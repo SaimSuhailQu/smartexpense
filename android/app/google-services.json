@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "422544642479",
+    "project_id": "smartexpenseapp-4e111",
+    "storage_bucket": "smartexpenseapp-4e111.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422544642479:android:80cf63b589f8fab0e4df5a",
+        "android_client_info": {
+          "package_name": "com.smartexpense"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "422544642479-8dc18r8q7tlo2ivpcs6k90qdob9fftb3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartexpense",
+            "certificate_hash": "6558408f1f27ecc9573276f24c4b3e5400f7e806"
+          }
+        },
+        {
+          "client_id": "422544642479-knp6gug7lk61ohbj7tpo6kc5bn7geilu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartexpense",
+            "certificate_hash": "e061a7ddb03b3b9d351117897c7179a3bc074d16"
+          }
+        },
+        {
+          "client_id": "422544642479-mq362at8tarj36jnc1tjv2rg8rq6pthu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartexpense",
+            "certificate_hash": "fc88b1aaad7b9740f932084ec8af060abd12ab25"
+          }
+        },
+        {
+          "client_id": "422544642479-94kl3b45mbprvknoon7rtmj05sebdaoj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMYqOQW6G_3IR1Awt5HE-WENyXyN6xNlA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "422544642479-94kl3b45mbprvknoon7rtmj05sebdaoj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
