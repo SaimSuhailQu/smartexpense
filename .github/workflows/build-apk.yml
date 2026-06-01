@@ -23,7 +23,7 @@ jobs:
 
       - name: Set up Java 17
         # v4.6.0
-        uses: actions/setup-java@3a472834ac7a402f617a50f82d0a8d446f9390c1
+        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -31,7 +31,7 @@ jobs:
 
       - name: Set up Flutter
         # v2.18.0
-        uses: subosito/flutter-action@f2c4f66a36c25248c1e1d39281e4b9e28328dc5a
+        uses: subosito/flutter-action@f2c4f6686ca8e8d6e6d0f28410eeef506ed66aff
         with:
           channel: 'stable'
           cache: true
