@@ -102,7 +102,7 @@ jobs:
 
       - name: Create or Update GitHub Release
         # v2.0.8
-        uses: softprops/action-gh-release@a939f826372573211516e8125433d749195b0578
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191
         with:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
           name: ${{ github.ref_type == 'tag' && github.ref_name || 'Latest Release Build' }}
