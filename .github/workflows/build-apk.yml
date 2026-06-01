@@ -18,17 +18,17 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@3a472834ac7a402f617a50f82d0a8d446f9390c1 # v4.6.0
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@f2c4f66a36c25248c1e1d39281e4b9e28328dc5a # v2.18.0
         with:
           channel: 'stable'
           cache: true
@@ -64,7 +64,7 @@ jobs:
         run: flutter build apk --release --split-per-abi
 
       - name: Upload Universal APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: smartexpense-universal-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -72,7 +72,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Split-per-ABI APK Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: smartexpense-split-apks
           path: |
