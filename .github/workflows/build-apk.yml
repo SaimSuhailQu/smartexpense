@@ -70,10 +70,10 @@ jobs:
           yes | flutter doctor --android-licenses
 
       - name: Build Universal Release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Build Split-per-ABI Release APKs
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi --no-tree-shake-icons
 
       - name: Upload Universal APK Artifact
         # v4.6.0
