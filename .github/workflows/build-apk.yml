@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - master
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - main
@@ -18,6 +20,8 @@ jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Code
@@ -95,3 +99,21 @@ jobs:
             build/app/outputs/flutter-apk/app-x86_64-release.apk
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Create or Update GitHub Release
+        # v2.0.8
+        uses: softprops/action-gh-release@a939f826372573211516e8125433d749195b0578
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
+          name: ${{ github.ref_type == 'tag' && github.ref_name || 'Latest Release Build' }}
+          body: |
+            Automated release build of SmartExpense.
+            
+            Triggered by commit: ${{ github.sha }} on branch/tag ${{ github.ref_name }}.
+          draft: false
+          prerelease: ${{ github.ref_type != 'tag' }}
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
