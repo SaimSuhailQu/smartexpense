@@ -77,8 +77,8 @@ void main() async {
 
   // ✅ Initialize and schedule notifications inside a try-catch block
   // to prevent startup crashes if initialization fails in virtualized environments like LiveContainer.
+  final notificationService = NotificationService();
   try {
-    final notificationService = NotificationService();
     await notificationService.initialize();
     // Skip scheduling on Linux as zonedSchedule is not implemented
     if (!Platform.isLinux) {
