@@ -17,6 +17,7 @@ import 'package:smartexpense/screens/add_loan_screen.dart';
 import 'package:smartexpense/screens/settings_screen.dart';
 import 'package:smartexpense/screens/profile_screen.dart';
 import 'package:smartexpense/screens/recent_expenses_screen.dart';
+import 'package:smartexpense/screens/recent_income_screen.dart';
 import 'package:smartexpense/widgets/fl_circular_expense_chart.dart';
 import 'package:smartexpense/widgets/category_expense_list.dart';
 import 'package:smartexpense/widgets/enhanced_yearly_charts_fixed.dart';
@@ -688,6 +689,14 @@ class _ProfessionalDashboardScreenState
                                 AppColors.error,
                                 cardColor,
                                 textColor,
+                                () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const RecentExpensesScreen(),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -700,6 +709,14 @@ class _ProfessionalDashboardScreenState
                                 AppColors.success,
                                 cardColor,
                                 textColor,
+                                () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const RecentIncomeScreen(),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ],
@@ -897,6 +914,7 @@ class _ProfessionalDashboardScreenState
     Color color,
     Color cardColor,
     Color textColor,
+    VoidCallback onTap,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -904,73 +922,76 @@ class _ProfessionalDashboardScreenState
         final horizontalPadding = isCompact ? 12.0 : 20.0;
         final verticalPadding = isCompact ? 16.0 : 20.0;
 
-        return GlassContainer(
-          padding: EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: verticalPadding,
-          ),
-          color: cardColor,
-          borderColor: color.withAlpha(40),
-          shadows: [
-            BoxShadow(
-              color: color.withAlpha(20),
-              spreadRadius: 0,
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+        return GestureDetector(
+          onTap: onTap,
+          child: GlassContainer(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
             ),
-          ],
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(isCompact ? 8.0 : 12.0),
-                    decoration: BoxDecoration(
-                      color: color.withAlpha(35),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, color: color, size: isCompact ? 20 : 24),
-                  ),
-                  Icon(
-                    Icons.more_vert,
-                    color: textColor.withAlpha(80),
-                    size: isCompact ? 16 : 18,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: textColor.withAlpha(150),
-                      fontSize: isCompact ? 11 : 13,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      value,
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: isCompact ? 18 : 22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ),
-                ],
+            color: cardColor,
+            borderColor: color.withAlpha(40),
+            shadows: [
+              BoxShadow(
+                color: color.withAlpha(20),
+                spreadRadius: 0,
+                blurRadius: 18,
+                offset: const Offset(0, 8),
               ),
             ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(isCompact ? 8.0 : 12.0),
+                      decoration: BoxDecoration(
+                        color: color.withAlpha(35),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: color, size: isCompact ? 20 : 24),
+                    ),
+                    Icon(
+                      Icons.more_vert,
+                      color: textColor.withAlpha(80),
+                      size: isCompact ? 16 : 18,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: textColor.withAlpha(150),
+                        fontSize: isCompact ? 11 : 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: isCompact ? 18 : 22,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
