@@ -1,7 +1,7 @@
 name: smartexpense
 description: Smart Expense Tracker App
 
-version: 1.0.0+9
+version: 1.0.0+10
 
 environment:
   sdk: '>=3.8.0 <4.0.0'

@@ -77,12 +77,14 @@ jobs:
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Run Firebase Test Lab Robo Test
+        env:
+          GCP_SA_KEY: ${{ secrets['GCP_SA_KEY'] }}
         run: |
-          if [ -z '${{ secrets.GCP_SA_KEY }}' ]; then
+          if [ -z "$GCP_SA_KEY" ]; then
             echo "Skipping Firebase Test Lab because GCP_SA_KEY is empty."
             exit 0
           fi
-          echo '${{ secrets.GCP_SA_KEY }}' > gcp_key.json
+          echo "$GCP_SA_KEY" > gcp_key.json
           gcloud auth activate-service-account --key-file=gcp_key.json
           gcloud config set project $(jq -r .project_id gcp_key.json)
           gcloud firebase test android run \
