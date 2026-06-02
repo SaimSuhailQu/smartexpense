@@ -15,6 +15,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
 jobs:
   build:
@@ -77,17 +78,17 @@ jobs:
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Authenticate to Google Cloud (Firebase)
-        if: "${{ secrets.GCP_SA_KEY != '' }}"
-        uses: google-github-actions/auth@c200f367ebba14df6373b53f666f7fbb12c6a0c2
+        if: env.GCP_SA_KEY != ''
+        uses: google-github-actions/auth@71f986410dfbc7added4569d411d040a91dc6935
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Cloud SDK
-        if: "${{ secrets.GCP_SA_KEY != '' }}"
-        uses: google-github-actions/setup-gcloud@e427ad887713d21b7c1264c7ad3db3bf827fa1e5
+        if: env.GCP_SA_KEY != ''
+        uses: google-github-actions/setup-gcloud@e3a89e4726e632d4310d5402488a0e051c519d55
 
       - name: Run Firebase Test Lab Robo Test
-        if: "${{ secrets.GCP_SA_KEY != '' }}"
+        if: env.GCP_SA_KEY != ''
         run: |
           gcloud firebase test android run \
             --type robo \
