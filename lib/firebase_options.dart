@@ -56,21 +56,21 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'demo-api-key',
-    appId: '1:123456789:ios:demo-app-id',
-    messagingSenderId: '123456789',
-    projectId: 'smartexpense-demo',
-    storageBucket: 'smartexpense-demo.appspot.com',
-    iosBundleId: 'com.example.smartexpense',
+    apiKey: 'AIzaSyD6xiNTSZsDD8Q-XAIqrdD8WSckf_bCgsc',
+    appId: '1:422544642479:ios:9546151b97b8a6aee4df5a',
+    messagingSenderId: '422544642479',
+    projectId: 'smartexpenseapp-4e111',
+    storageBucket: 'smartexpenseapp-4e111.firebasestorage.app',
+    iosBundleId: 'com.smartexpense',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'demo-api-key',
-    appId: '1:123456789:macos:demo-app-id',
-    messagingSenderId: '123456789',
-    projectId: 'smartexpense-demo',
-    storageBucket: 'smartexpense-demo.appspot.com',
-    iosBundleId: 'com.example.smartexpense',
+    apiKey: 'AIzaSyD6xiNTSZsDD8Q-XAIqrdD8WSckf_bCgsc',
+    appId: '1:422544642479:ios:9546151b97b8a6aee4df5a',
+    messagingSenderId: '422544642479',
+    projectId: 'smartexpenseapp-4e111',
+    storageBucket: 'smartexpenseapp-4e111.firebasestorage.app',
+    iosBundleId: 'com.smartexpense',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
