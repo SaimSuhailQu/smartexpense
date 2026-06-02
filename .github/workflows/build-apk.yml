@@ -76,6 +76,25 @@ jobs:
       - name: Build Universal Release APK
         run: flutter build apk --release --no-tree-shake-icons
 
+      - name: Authenticate to Google Cloud (Firebase)
+        if: "${{ secrets.GCP_SA_KEY != '' }}"
+        uses: google-github-actions/auth@c200f367ebba14df6373b53f666f7fbb12c6a0c2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        if: "${{ secrets.GCP_SA_KEY != '' }}"
+        uses: google-github-actions/setup-gcloud@e427ad887713d21b7c1264c7ad3db3bf827fa1e5
+
+      - name: Run Firebase Test Lab Robo Test
+        if: "${{ secrets.GCP_SA_KEY != '' }}"
+        run: |
+          gcloud firebase test android run \
+            --type robo \
+            --app build/app/outputs/flutter-apk/app-release.apk \
+            --robo-script .github/workflows/robo_script.json \
+            --timeout 3m
+
       - name: Build Split-per-ABI Release APKs
         run: flutter build apk --release --split-per-abi --no-tree-shake-icons
 
