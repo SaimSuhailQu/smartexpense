@@ -78,7 +78,7 @@ jobs:
 
       - name: Run Firebase Test Lab Robo Test
         env:
-          GCP_SA_KEY: ${{ secrets[format('{0}', 'GCP_SA_KEY')] }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: |
           if [ -z "$GCP_SA_KEY" ]; then
             echo "Skipping Firebase Test Lab because GCP_SA_KEY is empty."
