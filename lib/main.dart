@@ -75,12 +75,17 @@ void main() async {
   // ✅ Initialize time zones for local notifications
   tz.initializeTimeZones();
 
-  // ✅ Initialize and schedule notifications
-  final notificationService = NotificationService();
-  await notificationService.initialize();
-  // Skip scheduling on Linux as zonedSchedule is not implemented
-  if (!Platform.isLinux) {
-    await notificationService.scheduleDailyReminder();
+  // ✅ Initialize and schedule notifications inside a try-catch block
+  // to prevent startup crashes if initialization fails in virtualized environments like LiveContainer.
+  try {
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    // Skip scheduling on Linux as zonedSchedule is not implemented
+    if (!Platform.isLinux) {
+      await notificationService.scheduleDailyReminder();
+    }
+  } catch (e) {
+    debugPrint('Notification initialization or scheduling failed: $e');
   }
 
   runApp(
