@@ -85,7 +85,7 @@ jobs:
 
       - name: Set up Cloud SDK
         if: env.GCP_SA_KEY != ''
-        uses: google-github-actions/setup-gcloud@e3a89e4726e632d4310d5402488a0e051c519d55
+        uses: google-github-actions/setup-gcloud@f099058413dc08f51a441e8c750b3294025d57d7
 
       - name: Run Firebase Test Lab Robo Test
         if: env.GCP_SA_KEY != ''
