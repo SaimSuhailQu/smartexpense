@@ -68,6 +68,17 @@
 	</array>
 	<key>FLTEnableImpeller</key>
 	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.422544642479-rjq54othpgg9k1pelba1oeu0s5b2lm14</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
 
