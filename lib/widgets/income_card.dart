@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'dart:ui' show FontFeature;
 import '../models/income.dart';
 import '../services/currency_service.dart';
 import '../theme/app_colors.dart';
-
+import '../theme/typography.dart';
+import '../theme/spacing.dart';
 import 'glass_container.dart';
 
+/// Enhanced income card with semantic colors and tabular figures
+///
+/// Improvements:
+/// - Semantic income colors (WCAG AA compliant)
+/// - Tabular figures for aligned amount display
+/// - Improved spacing and visual hierarchy
+/// - Better contrast ratios for accessibility
 class IncomeCard extends StatelessWidget {
   final Income income;
   const IncomeCard({super.key, required this.income});
@@ -18,70 +27,113 @@ class IncomeCard extends StatelessWidget {
     final currencyService = Provider.of<CurrencyService>(context, listen: false);
     final formattedAmount = currencyService.formatAmount(income.amount);
 
+    // Use semantic income color
+    final incomeColor = AppColors.incomePositive;
+
     return GlassContainer(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: EdgeInsets.symmetric(
+        horizontal: AppSpacing.pageMarginHorizontal,
+        vertical: AppSpacing.cardGap / 2,
+      ),
       padding: EdgeInsets.zero,
-      borderRadius: BorderRadius.circular(20),
-      color: isDark ? AppColors.surfaceDark.withAlpha(100) : Colors.white.withAlpha(160),
-      borderColor: Colors.green.withAlpha(isDark ? 31 : 15),
-      shadows: [
-        BoxShadow(
-          color: Colors.black.withAlpha(isDark ? 30 : 10),
-          blurRadius: 8,
-          offset: const Offset(0, 4),
-        ),
-      ],
+      borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+      color: isDark
+          ? AppColors.surfaceDark.withOpacity(0.6)
+          : AppColors.surfaceLight.withOpacity(0.9),
+      borderColor: incomeColor.withOpacity(isDark ? 0.12 : 0.06),
+      shadows: AppColors.getShadow(theme.brightness, 2),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Leading accent bar with income color
               Container(
                 width: 5,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.greenAccent, Colors.tealAccent],
+                    colors: [
+                      incomeColor,
+                      incomeColor.withOpacity(0.7),
+                    ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
                 ),
               ),
+
+              // Card content
               Expanded(
-                child: ListTile(
-                  contentPadding: const EdgeInsets.fromLTRB(16, 8, 20, 8),
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withAlpha(26),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _getCategoryIcon(income.category),
-                      color: Colors.green,
-                      size: 22,
-                    ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
                   ),
-                  title: Text(
-                    income.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Plus Jakarta Sans',
-                    ),
-                  ),
-                  subtitle: Text(
-                    '${income.category} • ${DateFormat('MMM dd, yyyy').format(income.date)}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                    ),
-                  ),
-                  trailing: Text(
-                    '+ $formattedAmount',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                      fontFamily: 'Plus Jakarta Sans',
-                    ),
+                  child: Row(
+                    children: [
+                      // Category icon
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.iconPadding),
+                        decoration: BoxDecoration(
+                          color: incomeColor.withOpacity(isDark ? 0.15 : 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _getCategoryIcon(income.category),
+                          color: incomeColor,
+                          size: 22,
+                        ),
+                      ),
+
+                      AppSpacing.horizontalSpaceLG,
+
+                      // Title and metadata
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Income title
+                            Text(
+                              income.title,
+                              style: AppTypography.headingSmall(
+                                color: isDark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimaryLight,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            AppSpacing.verticalSpaceXS,
+
+                            // Category and date
+                            Text(
+                              '${income.category} • ${DateFormat('MMM dd, yyyy').format(income.date)}',
+                              style: AppTypography.labelMedium(
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondaryLight,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      AppSpacing.horizontalSpaceMD,
+
+                      // Amount with tabular figures
+                      Text(
+                        '+ $formattedAmount',
+                        style: AppTypography.financialMedium(
+                          color: incomeColor,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -92,6 +144,7 @@ class IncomeCard extends StatelessWidget {
     );
   }
 
+  /// Returns appropriate icon for income category
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
       case 'salary':
@@ -102,6 +155,16 @@ class IncomeCard extends StatelessWidget {
         return Icons.trending_up_outlined;
       case 'gift':
         return Icons.card_giftcard_outlined;
+      case 'business':
+        return Icons.business_outlined;
+      case 'rental':
+        return Icons.home_outlined;
+      case 'dividend':
+        return Icons.account_balance_outlined;
+      case 'interest':
+        return Icons.savings_outlined;
+      case 'bonus':
+        return Icons.star_outline;
       default:
         return Icons.add_chart_outlined;
     }
