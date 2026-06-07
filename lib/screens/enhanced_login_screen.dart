@@ -38,14 +38,28 @@ class _EnhancedLoginScreenState extends State<EnhancedLoginScreen> {
       final result = await Provider.of<AuthService>(context, listen: false)
           .signInWithEmailPassword(_emailController.text, _passwordController.text);
       if (!mounted) return;
+
       if (result == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Email/Password Sign-In failed')),
         );
-      } else if (result.user != null && !result.user!.emailVerified) {
+        return;
+      }
+
+      if (result.user != null && !result.user!.emailVerified) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please verify your email address. Check your inbox for verification email.')),
         );
+        // Navigate to email verification screen
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        Navigator.of(context).pushReplacementNamed('/email_verification');
+      } else if (result.user != null && result.user!.emailVerified) {
+        // Email is verified, navigate to dashboard
+        debugPrint('Email sign-in successful, user: ${result.user?.email}');
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        Navigator.of(context).pushReplacementNamed('/dashboard');
       }
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
@@ -75,14 +89,35 @@ class _EnhancedLoginScreenState extends State<EnhancedLoginScreen> {
     try {
       final result = await Provider.of<AuthService>(context, listen: false).signInWithGoogle();
       if (!mounted) return;
+
       if (result == null) {
+        // User cancelled the sign-in
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sign-in cancelled')),
+        );
         return;
       }
-      debugPrint('Google sign-in successful, user: ${result.user?.email}');
+
+      if (result.user != null) {
+        debugPrint('Google sign-in successful, user: ${result.user?.email}');
+
+        // Navigate to dashboard after successful sign-in
+        // The AuthWrapper StreamBuilder should automatically detect the auth state change
+        // but we add explicit navigation as a fallback
+
+        // Add a small delay to ensure auth state propagates
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        if (!mounted) return;
+
+        // Navigate to dashboard
+        Navigator.of(context).pushReplacementNamed('/dashboard');
+      }
     } catch (e) {
       if (!mounted) return;
+      debugPrint('Google sign-in error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
+        SnackBar(content: Text('Sign-in failed: ${e.toString()}')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

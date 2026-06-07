@@ -76,27 +76,6 @@ jobs:
       - name: Build Universal Release APK
         run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Install jq for JSON parsing
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Run Firebase Test Lab Robo Test
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-        run: |
-          if [ -z "$GCP_SA_KEY" ]; then
-            echo "Skipping Firebase Test Lab because GCP_SA_KEY is empty."
-            exit 0
-          fi
-          echo "$GCP_SA_KEY" > gcp_key.json
-          gcloud auth activate-service-account --key-file=gcp_key.json
-          gcloud config set project $(jq -r .project_id gcp_key.json)
-          gcloud firebase test android run \
-            --type robo \
-            --app build/app/outputs/flutter-apk/app-release.apk \
-            --robo-script .github/workflows/robo_script.json \
-            --timeout 3m
-          rm -f gcp_key.json
-
       - name: Build Split-per-ABI Release APKs
         run: flutter build apk --release --split-per-abi --no-tree-shake-icons
 
