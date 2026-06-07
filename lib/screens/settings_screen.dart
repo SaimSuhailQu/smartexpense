@@ -239,22 +239,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildCategoryManagement(List<String> categories, CategorizerService categorizer) {
+  Widget _buildCategoryManagement(List<String> categories, CategorizerService categorizer, bool isDark) {
     return Card(
-      elevation: 2,
+      elevation: 0,
+      color: AppColors.getSurfaceColor(Theme.of(context).brightness, 1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.06),
+          width: 1,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.category, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text('Categories', style: Theme.of(context).textTheme.titleLarge),
+                Icon(Icons.category, color: AppColors.primary),
+                AppSpacing.horizontalSpaceSM,
+                Text(
+                  'Categories',
+                  style: AppTypography.headingMedium(
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
+                ),
                 const Spacer(),
-                Text('${categories.length} categories', 
-                     style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  '${categories.length} categories',
+                  style: AppTypography.bodySmall(
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -315,19 +334,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildImportExportSection() {
+  Widget _buildImportExportSection(bool isDark) {
     return Card(
-      elevation: 2,
+      elevation: 0,
+      color: AppColors.getSurfaceColor(Theme.of(context).brightness, 1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.06),
+          width: 1,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.cloud_sync, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text('Data Management', style: Theme.of(context).textTheme.titleLarge),
+                Icon(Icons.cloud_sync, color: AppColors.primary),
+                AppSpacing.horizontalSpaceSM,
+                Text(
+                  'Data Management',
+                  style: AppTypography.headingMedium(
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -435,29 +469,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildAppInfo() {
+  Widget _buildAppInfo(bool isDark) {
     return Card(
-      elevation: 2,
+      elevation: 0,
+      color: AppColors.getSurfaceColor(Theme.of(context).brightness, 1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.06),
+          width: 1,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
             Text(
               'Smart Expense Tracker',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppTypography.headingMedium(
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
               ),
             ),
-            const SizedBox(height: 8),
+            AppSpacing.verticalSpaceSM,
             Text(
               'Version 1.0.0',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: AppTypography.bodyMedium(
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              ),
             ),
-            const SizedBox(height: 8),
+            AppSpacing.verticalSpaceSM,
             Text(
               'Created by SSQ',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+              style: AppTypography.bodySmall(
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
               ),
             ),
           ],

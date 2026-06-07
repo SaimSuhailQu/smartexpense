@@ -10,7 +10,7 @@ import '../theme/spacing.dart';
 /// - Match the shape and layout of actual content
 /// - Smooth shimmer animation
 /// - Themed for both light and dark modes
-class ShimmerLoading extends StatelessWidget {
+class ShimmerLoading {
   const ShimmerLoading._();
 
   /// Card shimmer for expense/income cards

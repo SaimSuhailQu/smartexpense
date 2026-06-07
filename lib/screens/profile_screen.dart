@@ -137,6 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
     if (_user == null) {
       return Scaffold(
