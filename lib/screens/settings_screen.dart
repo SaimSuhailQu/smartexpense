@@ -9,6 +9,9 @@ import 'package:smartexpense/services/auth_service.dart';
 import 'package:smartexpense/services/theme_service.dart';
 import 'package:smartexpense/utils/date_utils.dart';
 import 'package:smartexpense/utils/stream_extensions.dart';
+import 'package:smartexpense/theme/app_colors.dart';
+import 'package:smartexpense/theme/typography.dart';
+import 'package:smartexpense/theme/spacing.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
@@ -22,83 +25,136 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final categorizer = context.watch<CategorizerService>();
     final currencyService = context.watch<CurrencyService>();
     final themeService = context.watch<ThemeService>();
     final categories = categorizer.categories.keys.toList();
 
     return Scaffold(
+      // Background color using theme-aware surface color
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(
+          'Settings',
+          style: AppTypography.headingMedium(
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+          ),
+        ),
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
         elevation: 0,
+        iconTheme: IconThemeData(
+          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+        ),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.lg),
         children: [
-          _buildThemeSetting(themeService),
-          const SizedBox(height: 16),
-          _buildCurrencySetting(currencyService),
-          const SizedBox(height: 16),
-          _buildCategoryManagement(categories, categorizer),
-          const SizedBox(height: 16),
-          _buildImportExportSection(),
-          const SizedBox(height: 16),
-          _buildAppInfo(),
+          _buildThemeSetting(themeService, isDark),
+          AppSpacing.verticalSpaceLG,
+          _buildCurrencySetting(currencyService, isDark),
+          AppSpacing.verticalSpaceLG,
+          _buildCategoryManagement(categories, categorizer, isDark),
+          AppSpacing.verticalSpaceLG,
+          _buildImportExportSection(isDark),
+          AppSpacing.verticalSpaceLG,
+          _buildAppInfo(isDark),
         ],
       ),
     );
   }
 
-  Widget _buildThemeSetting(ThemeService themeService) {
+  Widget _buildThemeSetting(ThemeService themeService, bool isDark) {
     return Card(
-      elevation: 2,
+      elevation: 0,
+      color: AppColors.getSurfaceColor(Theme.of(context).brightness, 1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.06),
+          width: 1,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.palette, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text('Appearance', style: Theme.of(context).textTheme.titleLarge),
+                Icon(Icons.palette, color: AppColors.primary),
+                AppSpacing.horizontalSpaceSM,
+                Text(
+                  'Appearance',
+                  style: AppTypography.headingMedium(
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            Text('Theme Color', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
+            AppSpacing.verticalSpaceLG,
+            Text(
+              'Theme Color',
+              style: AppTypography.headingSmall(
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              ),
+            ),
+            AppSpacing.verticalSpaceSM,
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: themeService.availableThemes.entries.map((entry) {
                 final isDynamic = entry.key == 'Dynamic';
-                final chipColor = isDynamic 
-                    ? Theme.of(context).colorScheme.primary 
+                final chipColor = isDynamic
+                    ? Theme.of(context).colorScheme.primary
                     : entry.value;
 
                 return ChoiceChip(
-                  label: Text(entry.key),
+                  label: Text(
+                    entry.key,
+                    style: AppTypography.labelMedium(
+                      color: themeService.themeName == entry.key
+                          ? Colors.white
+                          : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                    ),
+                  ),
                   selected: themeService.themeName == entry.key,
-                  selectedColor: chipColor.withAlpha(80),
+                  selectedColor: chipColor,
+                  backgroundColor: isDark ? AppColors.surfaceDark2 : AppColors.surfaceLight2,
                   onSelected: (selected) {
                     if (selected) {
                       themeService.setTheme(entry.key);
-                      _showSnackBar('Theme changed to ${entry.key}', Colors.green);
+                      _showSnackBar('Theme changed to ${entry.key}', AppColors.success);
                     }
                   },
                 );
               }).toList(),
             ),
-            const SizedBox(height: 16),
+            AppSpacing.verticalSpaceLG,
             SwitchListTile(
-              title: const Text('Dark Mode'),
-              subtitle: Text(themeService.isDarkMode ? 'Dark theme enabled' : 'Light theme enabled'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                'Dark Mode',
+                style: AppTypography.headingSmall(
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                ),
+              ),
+              subtitle: Text(
+                themeService.isDarkMode ? 'Dark theme enabled' : 'Light theme enabled',
+                style: AppTypography.bodySmall(
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                ),
+              ),
               value: themeService.isDarkMode,
+              activeColor: AppColors.primary,
               onChanged: (value) {
                 themeService.toggleDarkMode();
                 _showSnackBar(
                   value ? 'Dark mode enabled' : 'Light mode enabled',
-                  Colors.green,
+                  AppColors.success,
                 );
               },
             ),
@@ -108,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildCurrencySetting(CurrencyService currencyService) {
+  Widget _buildCurrencySetting(CurrencyService currencyService, bool isDark) {
     final currencies = {
       'USD': '🇺🇸 US Dollar',
       'EUR': '🇪🇺 Euro',
@@ -120,26 +176,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
     };
 
     return Card(
-      elevation: 2,
+      elevation: 0,
+      color: AppColors.getSurfaceColor(Theme.of(context).brightness, 1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.06),
+          width: 1,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.monetization_on, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 8),
-                Text('Currency', style: Theme.of(context).textTheme.titleLarge),
+                Icon(Icons.monetization_on, color: AppColors.primary),
+                AppSpacing.horizontalSpaceSM,
+                Text(
+                  'Currency',
+                  style: AppTypography.headingMedium(
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 16),
+            AppSpacing.verticalSpaceLG,
             DropdownButtonFormField<String>(
               initialValue: currencyService.primaryCurrency,
-              decoration: const InputDecoration(
-                labelText: 'Select Primary Currency',
-                border: OutlineInputBorder(),
+              style: AppTypography.bodyMedium(
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
               ),
+              decoration: InputDecoration(
+                labelText: 'Select Primary Currency',
+                labelStyle: AppTypography.labelMedium(
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
+                ),
+              ),
+              dropdownColor: AppColors.getSurfaceColor(Theme.of(context).brightness, 2),
               items: currencies.entries
                   .map((entry) => DropdownMenuItem(
                         value: entry.key,
@@ -149,7 +229,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (value) {
                 if (value != null) {
                   currencyService.setPrimaryCurrency(value);
-                  _showSnackBar('Primary currency changed to $value', Colors.green);
+                  _showSnackBar('Primary currency changed to $value', AppColors.success);
                 }
               },
             ),
@@ -390,9 +470,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          style: AppTypography.bodyMedium(color: Colors.white),
+        ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
+        ),
         duration: const Duration(seconds: 2),
       ),
     );

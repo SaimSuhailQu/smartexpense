@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smartexpense/services/auth_service.dart';
+import 'package:smartexpense/theme/app_colors.dart';
+import 'package:smartexpense/theme/typography.dart';
+import 'package:smartexpense/theme/spacing.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -132,164 +135,228 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     if (_user == null) {
-      return const Scaffold(
+      return Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
         ),
       );
     }
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkMode ? const Color(0xFF1C1C23) : const Color(0xFFF4F5F7);
-    final cardColor = isDarkMode ? const Color(0xFF2A2A35) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-
     return Scaffold(
-      backgroundColor: backgroundColor,
+      // Background color using theme-aware surface color
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text('Profile', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-        backgroundColor: backgroundColor,
+        title: Text(
+          'Profile',
+          style: AppTypography.headingMedium(
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+          ),
+        ),
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
         elevation: 0,
+        iconTheme: IconThemeData(
+          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            AppSpacing.verticalSpaceXL,
             GestureDetector(
               onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Theme.of(context).primaryColor,
-                backgroundImage: _profileImage != null
-                    ? FileImage(File(_profileImage!.path)) as ImageProvider<Object>
-                    : (_user?.photoURL != null && _user!.photoURL!.isNotEmpty
-                        ? NetworkImage(_user!.photoURL!) as ImageProvider<Object>
-                        : null),
-                child: _profileImage == null && (_user?.photoURL == null || _user!.photoURL!.isEmpty)
-                    ? Text(
-                        _getUserInitials(),
-                        style: const TextStyle(fontSize: 32, color: Colors.white),
-                      )
-                    : null,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.primary,
+                    backgroundImage: _profileImage != null
+                        ? FileImage(File(_profileImage!.path)) as ImageProvider<Object>
+                        : (_user?.photoURL != null && _user!.photoURL!.isNotEmpty
+                            ? NetworkImage(_user!.photoURL!) as ImageProvider<Object>
+                            : null),
+                    child: _profileImage == null && (_user?.photoURL == null || _user!.photoURL!.isEmpty)
+                        ? Text(
+                            _getUserInitials(),
+                            style: AppTypography.headingXLarge(color: Colors.white),
+                          )
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(AppSpacing.xs),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+            AppSpacing.verticalSpaceLG,
             Text(
               _nameController.text.isNotEmpty ? _nameController.text : (_user?.displayName ?? 'User'),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textColor,
+              style: AppTypography.headingLarge(
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
               ),
             ),
-            const SizedBox(height: 8),
+            AppSpacing.verticalSpaceSM,
             Text(
               _user?.email ?? 'No email',
-              style: TextStyle(
-                fontSize: 16,
-                color: textColor.withAlpha(180),
+              style: AppTypography.bodyLarge(
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
               ),
             ),
-            const SizedBox(height: 32),
+            AppSpacing.verticalSpaceXXL,
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.getSurfaceColor(theme.brightness, 1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : Colors.black.withOpacity(0.06),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Profile Information',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
+                    style: AppTypography.headingMedium(
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  AppSpacing.verticalSpaceLG,
                   TextField(
                     controller: _nameController,
+                    style: AppTypography.bodyMedium(
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    ),
                     decoration: InputDecoration(
                       labelText: 'Display Name',
+                      labelStyle: AppTypography.labelMedium(
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  AppSpacing.verticalSpaceLG,
                   ElevatedButton(
                     onPressed: _updateProfile,
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 40),
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
+                      ),
                     ),
-                    child: const Text('Update Profile'),
+                    child: Text(
+                      'Update Profile',
+                      style: AppTypography.buttonMedium(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            AppSpacing.verticalSpaceXXL,
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.getSurfaceColor(theme.brightness, 1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : Colors.black.withOpacity(0.06),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Account Information',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
+                    style: AppTypography.headingMedium(
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow('User ID', _user?.uid ?? 'N/A', textColor),
-                  _buildInfoRow('Email', _user?.email ?? 'N/A', textColor),
-                  _buildInfoRow('Email Verified', _user?.emailVerified ?? false ? 'Yes' : 'No', textColor),
+                  AppSpacing.verticalSpaceLG,
+                  _buildInfoRow('User ID', _user?.uid ?? 'N/A', isDark),
+                  _buildInfoRow('Email', _user?.email ?? 'N/A', isDark),
+                  _buildInfoRow('Email Verified', _user?.emailVerified ?? false ? 'Yes' : 'No', isDark),
                   if (!(_user?.emailVerified ?? true))
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                      padding: EdgeInsets.only(top: AppSpacing.md),
                       child: ElevatedButton(
                         onPressed: _sendVerificationEmail,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          minimumSize: const Size(double.infinity, 40),
+                          backgroundColor: AppColors.warning,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
+                          ),
                         ),
-                        child: const Text('Send Verification Email'),
+                        child: Text(
+                          'Send Verification Email',
+                          style: AppTypography.buttonMedium(color: Colors.white),
+                        ),
                       ),
                     ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow('Account Created', _user?.metadata.creationTime?.toString().substring(0, 10) ?? 'N/A', textColor),
+                  AppSpacing.verticalSpaceLG,
+                  _buildInfoRow('Account Created', _user?.metadata.creationTime?.toString().substring(0, 10) ?? 'N/A', isDark),
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            AppSpacing.verticalSpaceXXL,
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.getSurfaceColor(theme.brightness, 1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : Colors.black.withOpacity(0.06),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.account_circle, color: Theme.of(context).primaryColor),
-                      const SizedBox(width: 8),
+                      Icon(Icons.account_circle, color: AppColors.primary),
+                      AppSpacing.horizontalSpaceSM,
                       Text(
                         'Account Actions',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
+                        style: AppTypography.headingMedium(
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                         ),
                       ),
                     ],
@@ -358,7 +425,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            AppSpacing.verticalSpaceLG,
             ElevatedButton(
               onPressed: () async {
                 await _authService.signOut();
@@ -367,15 +434,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: AppColors.expenseNormal,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 54),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Sign Out',
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style: AppTypography.buttonLarge(color: Colors.white),
               ),
             ),
           ],
@@ -386,30 +454,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // -------------------- HELPER METHODS --------------------
   // Paste these INSIDE _ProfileScreenState, before the last '}'
 
-  Widget _buildInfoRow(String label, String value, Color textColor) {
+  Widget _buildInfoRow(String label, String value, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: textColor.withAlpha(179), 
-              fontSize: 16,
+            style: AppTypography.labelLarge(
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             ),
           ),
-          const SizedBox(width: 16),
+          AppSpacing.horizontalSpaceLG,
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.end,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+              style: AppTypography.bodyMedium(
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
               ),
             ),
           ),
