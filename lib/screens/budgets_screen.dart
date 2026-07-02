@@ -127,8 +127,8 @@ class BudgetsScreen extends StatelessWidget {
                     // Subtle border for depth perception
                     side: BorderSide(
                       color: isDark
-                          ? Colors.white.withOpacity(0.08)
-                          : Colors.black.withOpacity(0.06),
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.06),
                       width: 1,
                     ),
                   ),
@@ -158,7 +158,7 @@ class BudgetsScreen extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(AppSpacing.sm),
                                       decoration: BoxDecoration(
-                                        color: budgetColor.withOpacity(isDark ? 0.15 : 0.1),
+                                        color: budgetColor.withValues(alpha: isDark ? 0.15 : 0.1),
                                         borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
                                       ),
                                       child: Icon(

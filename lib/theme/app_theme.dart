@@ -56,11 +56,11 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.surfaceLight,
         elevation: 0,
-        shadowColor: Colors.black.withOpacity(0.08),
+        shadowColor: Colors.black.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
           side: BorderSide(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             width: 1,
           ),
         ),
@@ -76,7 +76,7 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white, // WCAG AAA contrast
           elevation: 0,
-          shadowColor: AppColors.primary.withOpacity(0.3),
+          shadowColor: AppColors.primary.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
           ),
@@ -129,7 +129,7 @@ class AppTheme {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
           borderSide: BorderSide(
-            color: AppColors.neutralGrayLight.withOpacity(0.3),
+            color: AppColors.neutralGrayLight.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -138,7 +138,7 @@ class AppTheme {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
           borderSide: BorderSide(
-            color: AppColors.neutralGrayLight.withOpacity(0.3),
+            color: AppColors.neutralGrayLight.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -197,7 +197,7 @@ class AppTheme {
       bottomAppBarTheme: BottomAppBarThemeData(
         color: AppColors.surfaceLight,
         elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha: 0.1),
         shape: const CircularNotchedRectangle(),
       ),
 
@@ -205,8 +205,8 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceLight2,
         deleteIconColor: AppColors.textSecondaryLight,
-        disabledColor: AppColors.neutralGrayLight.withOpacity(0.3),
-        selectedColor: AppColors.primary.withOpacity(0.2),
+        disabledColor: AppColors.neutralGrayLight.withValues(alpha: 0.3),
+        selectedColor: AppColors.primary.withValues(alpha: 0.2),
         labelStyle: AppTypography.labelMedium(
           color: AppColors.textPrimaryLight,
         ),
@@ -221,7 +221,7 @@ class AppTheme {
 
       // ==================== DIVIDER THEME ====================
       dividerTheme: DividerThemeData(
-        color: AppColors.neutralGrayLight.withOpacity(0.2),
+        color: AppColors.neutralGrayLight.withValues(alpha: 0.2),
         thickness: 1,
         space: AppSpacing.lg,
       ),
@@ -230,7 +230,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceLight,
         elevation: 24,
-        shadowColor: Colors.black.withOpacity(0.15),
+        shadowColor: Colors.black.withValues(alpha: 0.15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
         ),
@@ -312,11 +312,11 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.surfaceDark,
         elevation: 0,
-        shadowColor: Colors.black.withOpacity(0.3),
+        shadowColor: Colors.black.withValues(alpha: 0.3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
           side: BorderSide(
-            color: Colors.white.withOpacity(0.06),
+            color: Colors.white.withValues(alpha: 0.06),
             width: 1,
           ),
         ),
@@ -332,7 +332,7 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white, // WCAG AAA contrast
           elevation: 0,
-          shadowColor: AppColors.primary.withOpacity(0.5),
+          shadowColor: AppColors.primary.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
           ),
@@ -384,7 +384,7 @@ class AppTheme {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
           borderSide: BorderSide(
-            color: AppColors.neutralGrayLight.withOpacity(0.2),
+            color: AppColors.neutralGrayLight.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -393,7 +393,7 @@ class AppTheme {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMD),
           borderSide: BorderSide(
-            color: AppColors.neutralGrayLight.withOpacity(0.2),
+            color: AppColors.neutralGrayLight.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -452,7 +452,7 @@ class AppTheme {
       bottomAppBarTheme: BottomAppBarThemeData(
         color: AppColors.surfaceDark,
         elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.3),
+        shadowColor: Colors.black.withValues(alpha: 0.3),
         shape: const CircularNotchedRectangle(),
       ),
 
@@ -460,8 +460,8 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceDark2,
         deleteIconColor: AppColors.textSecondaryDark,
-        disabledColor: AppColors.neutralGrayDark.withOpacity(0.3),
-        selectedColor: AppColors.primary.withOpacity(0.3),
+        disabledColor: AppColors.neutralGrayDark.withValues(alpha: 0.3),
+        selectedColor: AppColors.primary.withValues(alpha: 0.3),
         labelStyle: AppTypography.labelMedium(
           color: AppColors.textPrimaryDark,
         ),
@@ -476,7 +476,7 @@ class AppTheme {
 
       // ==================== DIVIDER THEME ====================
       dividerTheme: DividerThemeData(
-        color: AppColors.neutralGrayLight.withOpacity(0.1),
+        color: AppColors.neutralGrayLight.withValues(alpha: 0.1),
         thickness: 1,
         space: AppSpacing.lg,
       ),
@@ -485,7 +485,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceDark,
         elevation: 24,
-        shadowColor: Colors.black.withOpacity(0.5),
+        shadowColor: Colors.black.withValues(alpha: 0.5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
         ),

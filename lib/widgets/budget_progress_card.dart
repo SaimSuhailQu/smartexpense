@@ -36,9 +36,9 @@ class BudgetProgressCard extends StatelessWidget {
       padding: EdgeInsets.all(AppSpacing.cardPadding),
       borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
       color: isDark
-          ? AppColors.surfaceDark.withOpacity(0.6)
-          : AppColors.surfaceLight.withOpacity(0.9),
-      borderColor: AppColors.primary.withOpacity(isDark ? 0.12 : 0.06),
+          ? AppColors.surfaceDark.withValues(alpha: 0.6)
+          : AppColors.surfaceLight.withValues(alpha: 0.9),
+      borderColor: AppColors.primary.withValues(alpha: isDark ? 0.12 : 0.06),
       shadows: AppColors.getShadow(theme.brightness, 2),
       child: StreamBuilder<List<Expense>>(
         stream: Provider.of<ExpenseService>(context)
@@ -74,7 +74,7 @@ class BudgetProgressCard extends StatelessWidget {
                       vertical: AppSpacing.sm,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(isDark ? 0.2 : 0.15),
+                      color: AppColors.primary.withValues(alpha: isDark ? 0.2 : 0.15),
                       borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
                     ),
                     child: Text(
@@ -133,7 +133,7 @@ class BudgetProgressCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                         boxShadow: [
                           BoxShadow(
-                            color: statusColor.withOpacity(0.3),
+                            color: statusColor.withValues(alpha: 0.3),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -163,7 +163,7 @@ class BudgetProgressCard extends StatelessWidget {
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.budgetOverspent.withOpacity(0.15),
+                        color: AppColors.budgetOverspent.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(AppSpacing.radiusXS),
                       ),
                       child: Row(

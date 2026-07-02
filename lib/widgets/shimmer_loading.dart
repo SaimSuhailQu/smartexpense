@@ -28,8 +28,8 @@ class ShimmerLoading {
           borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.06)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.black.withValues(alpha: 0.05),
           ),
         ),
         child: Row(
@@ -117,8 +117,8 @@ class ShimmerLoading {
           borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.06)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.black.withValues(alpha: 0.05),
           ),
         ),
         child: Column(
@@ -177,8 +177,8 @@ class ShimmerLoading {
           borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.06)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.black.withValues(alpha: 0.05),
           ),
         ),
         child: Column(
@@ -294,8 +294,8 @@ class ShimmerLoading {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXL),
                 border: Border.all(
                   color: isDark
-                      ? Colors.white.withOpacity(0.06)
-                      : Colors.black.withOpacity(0.05),
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : Colors.black.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -362,7 +362,7 @@ class _ShimmerWrapper extends StatelessWidget {
           ? AppColors.surfaceDark1
           : AppColors.surfaceLight2,
       highlightColor: isDark
-          ? AppColors.surfaceDark2.withOpacity(0.5)
+          ? AppColors.surfaceDark2.withValues(alpha: 0.5)
           : Colors.white,
       period: const Duration(milliseconds: 1500),
       child: child,

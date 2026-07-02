@@ -331,14 +331,14 @@ class AppGradients {
       end: Alignment.bottomRight,
       colors: isDark
           ? [
-              Colors.white.withOpacity(0.05),
-              Colors.white.withOpacity(0.02),
-              Colors.white.withOpacity(0.01),
+              Colors.white.withValues(alpha: 0.05),
+              Colors.white.withValues(alpha: 0.02),
+              Colors.white.withValues(alpha: 0.01),
             ]
           : [
-              Colors.white.withOpacity(0.7),
-              Colors.white.withOpacity(0.5),
-              Colors.white.withOpacity(0.3),
+              Colors.white.withValues(alpha: 0.7),
+              Colors.white.withValues(alpha: 0.5),
+              Colors.white.withValues(alpha: 0.3),
             ],
       stops: const [0.0, 0.5, 1.0],
     );
@@ -354,14 +354,14 @@ class AppGradients {
       end: Alignment.bottomRight,
       colors: isDark
           ? [
-              Colors.white.withOpacity(0.2),
-              Colors.white.withOpacity(0.1),
-              Colors.white.withOpacity(0.05),
+              Colors.white.withValues(alpha: 0.2),
+              Colors.white.withValues(alpha: 0.1),
+              Colors.white.withValues(alpha: 0.05),
             ]
           : [
-              Colors.white.withOpacity(0.8),
-              Colors.white.withOpacity(0.6),
-              Colors.black.withOpacity(0.1),
+              Colors.white.withValues(alpha: 0.8),
+              Colors.white.withValues(alpha: 0.6),
+              Colors.black.withValues(alpha: 0.1),
             ],
       stops: const [0.0, 0.5, 1.0],
     );
@@ -493,7 +493,7 @@ class AppGradients {
   ///
   /// Example:
   /// ```dart
-  /// final transparentGradient = AppGradients.withOpacity(
+  /// final transparentGradient = AppGradients.withValues(alpha: 
   ///   AppGradients.primaryGradient,
   ///   0.5,
   /// );
@@ -504,7 +504,7 @@ class AppGradients {
     return LinearGradient(
       begin: gradient.begin,
       end: gradient.end,
-      colors: gradient.colors.map((color) => color.withOpacity(opacity)).toList(),
+      colors: gradient.colors.map((color) => color.withValues(alpha: opacity)).toList(),
       stops: gradient.stops,
       tileMode: gradient.tileMode,
       transform: gradient.transform,

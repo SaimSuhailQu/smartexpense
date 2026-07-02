@@ -37,9 +37,9 @@ class ExpenseCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
       color: isDark
-          ? AppColors.surfaceDark.withOpacity(0.6)
-          : AppColors.surfaceLight.withOpacity(0.9),
-      borderColor: expenseColor.withOpacity(isDark ? 0.12 : 0.06),
+          ? AppColors.surfaceDark.withValues(alpha: 0.6)
+          : AppColors.surfaceLight.withValues(alpha: 0.9),
+      borderColor: expenseColor.withValues(alpha: isDark ? 0.12 : 0.06),
       shadows: AppColors.getShadow(theme.brightness, 2),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLG),
@@ -54,7 +54,7 @@ class ExpenseCard extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       expenseColor,
-                      expenseColor.withOpacity(0.7),
+                      expenseColor.withValues(alpha: 0.7),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -75,7 +75,7 @@ class ExpenseCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.iconPadding),
                         decoration: BoxDecoration(
-                          color: expenseColor.withOpacity(isDark ? 0.15 : 0.1),
+                          color: expenseColor.withValues(alpha: isDark ? 0.15 : 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(

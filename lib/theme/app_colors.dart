@@ -130,7 +130,7 @@ class AppColors {
   // Elevation shadows for light theme (subtle depth)
   static List<BoxShadow> get shadowLight1 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 4,
       offset: const Offset(0, 1),
     ),
@@ -138,7 +138,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowLight2 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.06),
+      color: Colors.black.withValues(alpha: 0.06),
       blurRadius: 8,
       offset: const Offset(0, 2),
     ),
@@ -146,7 +146,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowLight3 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.08),
+      color: Colors.black.withValues(alpha: 0.08),
       blurRadius: 16,
       offset: const Offset(0, 4),
     ),
@@ -154,7 +154,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowLight4 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.10),
+      color: Colors.black.withValues(alpha: 0.10),
       blurRadius: 24,
       offset: const Offset(0, 8),
     ),
@@ -163,7 +163,7 @@ class AppColors {
   // Elevation shadows for dark theme (subtle glow)
   static List<BoxShadow> get shadowDark1 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.20),
+      color: Colors.black.withValues(alpha: 0.20),
       blurRadius: 4,
       offset: const Offset(0, 1),
     ),
@@ -171,7 +171,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowDark2 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.30),
+      color: Colors.black.withValues(alpha: 0.30),
       blurRadius: 8,
       offset: const Offset(0, 2),
     ),
@@ -179,7 +179,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowDark3 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.40),
+      color: Colors.black.withValues(alpha: 0.40),
       blurRadius: 16,
       offset: const Offset(0, 4),
     ),
@@ -187,7 +187,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowDark4 => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.50),
+      color: Colors.black.withValues(alpha: 0.50),
       blurRadius: 24,
       offset: const Offset(0, 8),
     ),

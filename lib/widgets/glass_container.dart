@@ -175,13 +175,13 @@ class _GlassContainerState extends State<GlassContainer>
     // Dynamic HSL-tailored colors for glass morphism effect
     final Color glassColor = widget.color ??
         (isDark
-            ? Colors.black.withOpacity(0.25) // Enhanced translucent black
-            : Colors.white.withOpacity(0.60)); // Enhanced translucent white
+            ? Colors.black.withValues(alpha: 0.25) // Enhanced translucent black
+            : Colors.white.withValues(alpha: 0.60)); // Enhanced translucent white
 
     final Color glassBorderColor = widget.borderColor ??
         (isDark
-            ? Colors.white.withOpacity(0.15) // Enhanced white edge
-            : Colors.black.withOpacity(0.10)); // Enhanced dark edge
+            ? Colors.white.withValues(alpha: 0.15) // Enhanced white edge
+            : Colors.black.withValues(alpha: 0.10)); // Enhanced dark edge
 
     // Determine gradient overlay
     final effectiveGradient = widget.gradient ??
@@ -191,13 +191,13 @@ class _GlassContainerState extends State<GlassContainer>
           colors: isDark
               ? [
                   glassColor,
-                  glassColor.withOpacity(0.15),
-                  glassColor.withOpacity(0.10),
+                  glassColor.withValues(alpha: 0.15),
+                  glassColor.withValues(alpha: 0.10),
                 ]
               : [
                   glassColor,
-                  glassColor.withOpacity(0.50),
-                  glassColor.withOpacity(0.40),
+                  glassColor.withValues(alpha: 0.50),
+                  glassColor.withValues(alpha: 0.40),
                 ],
           stops: const [0.0, 0.5, 1.0],
         );
@@ -294,7 +294,7 @@ class _GlassContainerState extends State<GlassContainer>
       case 1:
         return [
           BoxShadow(
-            color: baseColor.withOpacity(baseOpacity * 0.5),
+            color: baseColor.withValues(alpha: baseOpacity * 0.5),
             blurRadius: 8,
             spreadRadius: -2,
             offset: const Offset(0, 2),
@@ -303,7 +303,7 @@ class _GlassContainerState extends State<GlassContainer>
       case 2:
         return [
           BoxShadow(
-            color: baseColor.withOpacity(baseOpacity),
+            color: baseColor.withValues(alpha: baseOpacity),
             blurRadius: 16,
             spreadRadius: -4,
             offset: const Offset(0, 4),
@@ -312,7 +312,7 @@ class _GlassContainerState extends State<GlassContainer>
       case 3:
         return [
           BoxShadow(
-            color: baseColor.withOpacity(baseOpacity * 1.5),
+            color: baseColor.withValues(alpha: baseOpacity * 1.5),
             blurRadius: 24,
             spreadRadius: -6,
             offset: const Offset(0, 8),
@@ -321,7 +321,7 @@ class _GlassContainerState extends State<GlassContainer>
       case 4:
         return [
           BoxShadow(
-            color: baseColor.withOpacity(baseOpacity * 2),
+            color: baseColor.withValues(alpha: baseOpacity * 2),
             blurRadius: 32,
             spreadRadius: -8,
             offset: const Offset(0, 12),
@@ -330,7 +330,7 @@ class _GlassContainerState extends State<GlassContainer>
       default:
         return [
           BoxShadow(
-            color: baseColor.withOpacity(baseOpacity),
+            color: baseColor.withValues(alpha: baseOpacity),
             blurRadius: 16,
             spreadRadius: -4,
             offset: const Offset(0, 4),
@@ -406,8 +406,8 @@ class _NoiseOverlay extends StatelessWidget {
         borderRadius: borderRadius,
         // Create subtle grain effect using a repeating pattern
         color: isDark
-            ? Colors.white.withOpacity(opacity)
-            : Colors.black.withOpacity(opacity),
+            ? Colors.white.withValues(alpha: opacity)
+            : Colors.black.withValues(alpha: opacity),
         // Note: For true noise texture, consider using a shader or custom painter
         // This is a simplified version using opacity for performance
       ),

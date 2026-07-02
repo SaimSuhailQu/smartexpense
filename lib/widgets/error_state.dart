@@ -150,7 +150,7 @@ class ErrorState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.xxl),
               decoration: BoxDecoration(
-                color: errorColor.withOpacity(isDark ? 0.15 : 0.1),
+                color: errorColor.withValues(alpha: isDark ? 0.15 : 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -201,7 +201,7 @@ class ErrorState extends StatelessWidget {
                     color: (isDark
                             ? AppColors.textSecondaryDark
                             : AppColors.textSecondaryLight)
-                        .withOpacity(0.2),
+                        .withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),

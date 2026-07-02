@@ -220,8 +220,8 @@ class RecentIncomeScreen extends StatelessWidget {
                           // Subtle border for depth perception
                           side: BorderSide(
                             color: isDark
-                                ? Colors.white.withOpacity(0.08)
-                                : Colors.black.withOpacity(0.06),
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.06),
                             width: 1,
                           ),
                         ),
