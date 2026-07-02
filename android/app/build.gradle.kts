@@ -1,9 +1,18 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services") // ✅ Firebase plugin
     id("com.google.android.gms.strict-version-matcher-plugin")
+}
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = project.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -31,10 +40,15 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("smartexpense.jks")
-            storePassword = "Prex1211"
-            keyAlias = "smartexpense"
-            keyPassword = "Prex1211"
+            keyAlias = keystoreProperties.getProperty("keyAlias", "dummy")
+            keyPassword = keystoreProperties.getProperty("keyPassword", "dummy")
+            val storeFileProp = keystoreProperties.getProperty("storeFile", "smartexpense.jks")
+            storeFile = if (storeFileProp.startsWith("android/app/")) {
+                rootProject.file(storeFileProp)
+            } else {
+                project.file(storeFileProp)
+            }
+            storePassword = keystoreProperties.getProperty("storePassword", "dummy")
         }
     }
 
