@@ -669,7 +669,7 @@ class AppAnimations {
                 color: color ?? Theme.of(context).primaryColor,
                 shape: BoxShape.circle,
               ),
-              transform: Matrix4.identity()..scale(scale, scale),
+              transform: Matrix4.diagonal3Values(scale, scale, 1.0),
             );
           },
         );
