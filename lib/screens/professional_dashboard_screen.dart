@@ -1250,6 +1250,7 @@ class _ProfessionalDashboardScreenState
           children: [
             IconButton(
               icon: const Icon(Icons.chevron_left),
+              tooltip: 'Previous Year',
               onPressed: () {
                 setState(() {
                   _selectedDate = DateTime(
@@ -1270,6 +1271,7 @@ class _ProfessionalDashboardScreenState
             ),
             IconButton(
               icon: const Icon(Icons.chevron_right),
+              tooltip: 'Next Year',
               onPressed: () {
                 setState(() {
                   _selectedDate = DateTime(

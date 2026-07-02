@@ -41,6 +41,7 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left, size: 20),
+            tooltip: 'Previous Month',
             onPressed: () => _changeMonth(-1),
             splashRadius: 20,
           ),
@@ -60,6 +61,7 @@ class _MonthYearPickerState extends State<MonthYearPicker> {
           ),
           IconButton(
             icon: const Icon(Icons.chevron_right, size: 20),
+            tooltip: 'Next Month',
             onPressed: () => _changeMonth(1),
             splashRadius: 20,
           ),

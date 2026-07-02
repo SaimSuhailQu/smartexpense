@@ -15,6 +15,18 @@
     "eventType": "VIEW_CLICKED",
     "elementDescriptors": [
       {
+        "description": "Previous Month"
+      }
+    ]
+  },
+  {
+    "eventType": "DELAYED_MESSAGE_POSTED",
+    "delayTime": 1000
+  },
+  {
+    "eventType": "VIEW_CLICKED",
+    "elementDescriptors": [
+      {
         "text": "Expenses"
       }
     ]
