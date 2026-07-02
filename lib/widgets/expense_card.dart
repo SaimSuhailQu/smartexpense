@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'dart:ui' show FontFeature;
 import '../models/expense.dart';
 import '../services/currency_service.dart';
 import '../theme/app_colors.dart';

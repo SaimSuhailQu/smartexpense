@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'typography.dart';
 import 'spacing.dart';
@@ -228,7 +227,7 @@ class AppTheme {
       ),
 
       // ==================== DIALOG THEME ====================
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceLight,
         elevation: 24,
         shadowColor: Colors.black.withOpacity(0.15),
@@ -483,7 +482,7 @@ class AppTheme {
       ),
 
       // ==================== DIALOG THEME ====================
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceDark,
         elevation: 24,
         shadowColor: Colors.black.withOpacity(0.5),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:ui' show FontFeature;
 
 /// Enhanced typography system with tabular figures for financial data
 ///

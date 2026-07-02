@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui' show FontFeature;
 import 'package:smartexpense/models/budget.dart';
 import 'package:smartexpense/widgets/glass_container.dart';
 import 'package:smartexpense/services/expense_service.dart';
