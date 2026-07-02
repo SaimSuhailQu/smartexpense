@@ -440,7 +440,12 @@ class _ProfessionalDashboardScreenState
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const RecentExpensesScreen()),
+          MaterialPageRoute(
+            builder: (context) => RecentExpensesScreen(
+              selectedDate: _selectedDate,
+              selectedRange: _selectedRange,
+            ),
+          ),
         );
       },
       child: Card(
@@ -693,7 +698,10 @@ class _ProfessionalDashboardScreenState
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const RecentExpensesScreen(),
+                                      builder: (context) => RecentExpensesScreen(
+                                        selectedDate: _selectedDate,
+                                        selectedRange: _selectedRange,
+                                      ),
                                     ),
                                   );
                                 },
@@ -713,7 +721,10 @@ class _ProfessionalDashboardScreenState
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const RecentIncomeScreen(),
+                                      builder: (context) => RecentIncomeScreen(
+                                        selectedDate: _selectedDate,
+                                        selectedRange: _selectedRange,
+                                      ),
                                     ),
                                   );
                                 },

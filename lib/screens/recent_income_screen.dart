@@ -7,19 +7,45 @@ import 'package:smartexpense/services/currency_service.dart';
 import 'package:smartexpense/utils/date_utils.dart';
 
 class RecentIncomeScreen extends StatelessWidget {
-  const RecentIncomeScreen({super.key});
+  final DateTime? selectedDate;
+  final TimeRange? selectedRange;
+
+  const RecentIncomeScreen({
+    super.key,
+    this.selectedDate,
+    this.selectedRange,
+  });
+
+  String _getTitle(TimeRange range, DateTime date) {
+    switch (range) {
+      case TimeRange.daily:
+        return 'Income: ${DateFormat.yMMMd().format(date)}';
+      case TimeRange.weekly:
+        final start = date.subtract(Duration(days: date.weekday - 1));
+        final end = start.add(const Duration(days: 6));
+        return 'Income: ${DateFormat.yMMMd().format(start)} - ${DateFormat.yMMMd().format(end)}';
+      case TimeRange.monthly:
+        return 'Income: ${DateFormat.yMMM().format(date)}';
+      case TimeRange.yearly:
+        return 'Income: ${DateFormat.y().format(date)}';
+      default:
+        return 'Recent Income';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final date = selectedDate ?? DateTime.now();
+    final range = selectedRange ?? TimeRange.yearly;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recent Income'),
+        title: Text(_getTitle(range, date)),
       ),
       body: Consumer<IncomeService>(
         builder: (context, incomeService, child) {
-          // Using yearly range to show a comprehensive list of recent incomes
           return StreamBuilder<List<Income>>(
-            stream: incomeService.getIncomesStream(TimeRange.yearly, DateTime.now()),
+            stream: incomeService.getIncomesStream(range, date),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

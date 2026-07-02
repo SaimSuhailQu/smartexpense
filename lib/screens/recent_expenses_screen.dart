@@ -1,22 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:smartexpense/models/expense.dart';
 import 'package:smartexpense/services/expense_service.dart';
 import 'package:smartexpense/widgets/expense_card.dart';
 import 'package:smartexpense/utils/date_utils.dart';
 
 class RecentExpensesScreen extends StatelessWidget {
-  const RecentExpensesScreen({super.key});
+  final DateTime? selectedDate;
+  final TimeRange? selectedRange;
+
+  const RecentExpensesScreen({
+    super.key,
+    this.selectedDate,
+    this.selectedRange,
+  });
+
+  String _getTitle(TimeRange range, DateTime date) {
+    switch (range) {
+      case TimeRange.daily:
+        return 'Expenses: ${DateFormat.yMMMd().format(date)}';
+      case TimeRange.weekly:
+        final start = date.subtract(Duration(days: date.weekday - 1));
+        final end = start.add(const Duration(days: 6));
+        return 'Expenses: ${DateFormat.yMMMd().format(start)} - ${DateFormat.yMMMd().format(end)}';
+      case TimeRange.monthly:
+        return 'Expenses: ${DateFormat.yMMM().format(date)}';
+      case TimeRange.yearly:
+        return 'Expenses: ${DateFormat.y().format(date)}';
+      default:
+        return 'Recent Expenses';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final date = selectedDate ?? DateTime.now();
+    final range = selectedRange ?? TimeRange.monthly;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recent Expenses'),
+        title: Text(_getTitle(range, date)),
       ),
       body: StreamBuilder<List<Expense>>(
-        stream: context.read<ExpenseService>().getExpensesStream(TimeRange.monthly, DateTime.now()),
+        stream: context.read<ExpenseService>().getExpensesStream(range, date),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -26,7 +54,17 @@ class RecentExpensesScreen extends StatelessWidget {
           }
           final expenses = snapshot.data ?? [];
           if (expenses.isEmpty) {
-            return const Center(child: Text('No expenses recorded for this month.'));
+            String emptyMessage = 'No expenses recorded for this period.';
+            if (range == TimeRange.monthly) {
+              emptyMessage = 'No expenses recorded for this month.';
+            } else if (range == TimeRange.yearly) {
+              emptyMessage = 'No expenses recorded for this year.';
+            } else if (range == TimeRange.daily) {
+              emptyMessage = 'No expenses recorded for this day.';
+            } else if (range == TimeRange.weekly) {
+              emptyMessage = 'No expenses recorded for this week.';
+            }
+            return Center(child: Text(emptyMessage));
           }
           return ListView.builder(
             itemCount: expenses.length,
