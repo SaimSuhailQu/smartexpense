@@ -66,10 +66,11 @@ jobs:
             KEY_PASS="Prex1211"
             KEY_ALIAS="smartexpense"
           fi
-          # build.gradle.kts reads these from android/key.properties; without
-          # this file it falls back to alias/password "dummy" and signing fails.
+          # android/app/build.gradle.kts reads these via project.file("key.properties"),
+          # i.e. android/app/key.properties; without this file it falls back to
+          # alias/password "dummy" and signing fails.
           printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=smartexpense.jks\n' \
-            "$STORE_PASS" "$KEY_PASS" "$KEY_ALIAS" > android/key.properties
+            "$STORE_PASS" "$KEY_PASS" "$KEY_ALIAS" > android/app/key.properties
 
       - name: Install Dependencies
         run: flutter pub get
