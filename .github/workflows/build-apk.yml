@@ -51,6 +51,9 @@ jobs:
             STORE_PASS="${{ secrets.STORE_PASSWORD }}"
             KEY_PASS="${{ secrets.KEY_PASSWORD }}"
             KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
+            # Store and key passwords are usually identical; fall back so a
+            # missing STORE_PASSWORD secret doesn't break signing.
+            if [ -z "$STORE_PASS" ]; then STORE_PASS="$KEY_PASS"; fi
           else
             echo "No production keystore secret found. Generating a local dummy keystore for testing..."
             keytool -genkey -v \
