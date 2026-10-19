@@ -105,7 +105,7 @@ class CsvService {
 
           // Process amounts in columns 1, 2, 3, etc.
           for (var j = 1; j < row.length; j++) {
-            final amount = _parseAmount(row[j].toString());
+            final amount = parseAmount(row[j].toString());
             if (amount <= 0) continue;
 
             final DateTime expenseDate;
@@ -165,7 +165,7 @@ class CsvService {
 
         // Process amounts in columns 1, 2, 3, etc.
         for (var j = 1; j < row.length; j++) {
-          final amount = _parseAmount(row[j].toString());
+          final amount = parseAmount(row[j].toString());
           if (amount <= 0) continue;
 
           expenses.add(Expense(
@@ -282,7 +282,8 @@ class CsvService {
   }
 
   /// Helper method to parse amount from various formats
-  double _parseAmount(String value) {
+  /// Parses a user/CSV amount string. Public and static so it is unit-testable.
+  static double parseAmount(String value) {
     if (value.isEmpty) return 0.0;
 
     try {
