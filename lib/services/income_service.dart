@@ -60,6 +60,8 @@ class IncomeService with ChangeNotifier {
         .doc(user.uid)
         .collection('incomes');
 
+    // Hoisted: used by the mapper closure below in both filter branches.
+    List<String>? categoryFilter;
     if (filters != null && filters.isNotEmpty) {
       if (filters['startDate'] != null) {
         query = query.where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(filters['startDate']));
@@ -70,7 +72,7 @@ class IncomeService with ChangeNotifier {
       // Categories are filtered client-side below: server-side whereIn caps
       // at 10 elements and where(category)+orderBy(date) needs a composite
       // index, both of which crash at runtime.
-      final List<String>? categoryFilter =
+      categoryFilter =
           (filters['categories'] as List?)?.map((c) => c.toString()).toList();
       if (filters['minAmount'] != null) {
         query = query.where('amount', isGreaterThanOrEqualTo: filters['minAmount']);
@@ -159,7 +161,7 @@ class IncomeService with ChangeNotifier {
   /// so N foreign rows cost ~1 HTTP call instead of N serial round-trips.
   Future<double> calculateTotalInPrimaryCurrency(List<Income> incomes) async {
     final primaryCurrency = _currencyService.primaryCurrency;
-    final converted = await Future.wait(incomes.map((income) async {
+    final converted = await Future.wait<double>(incomes.map((income) async {
       if (income.currency == primaryCurrency) return income.amount;
       return _conversionService.convert(
         income.amount,
@@ -167,7 +169,7 @@ class IncomeService with ChangeNotifier {
         primaryCurrency,
       );
     }));
-    return converted.fold(0.0, (sum, amount) => sum + amount);
+    return converted.fold<double>(0.0, (sum, amount) => sum + amount);
   }
 
   // Helper: Start of time range
