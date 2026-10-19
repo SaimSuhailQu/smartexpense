@@ -60,6 +60,8 @@ class ExpenseService with ChangeNotifier {
         .doc(user.uid)
         .collection('expenses');
 
+    // Hoisted: used by the mapper closure below in both filter branches.
+    List<String>? categoryFilter;
     if (filters != null && filters.isNotEmpty) {
       if (filters['startDate'] != null) {
         query = query.where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(filters['startDate']));
@@ -67,9 +69,11 @@ class ExpenseService with ChangeNotifier {
       if (filters['endDate'] != null) {
         query = query.where('date', isLessThanOrEqualTo: Timestamp.fromDate(filters['endDate']));
       }
-      if (filters['categories'] != null && (filters['categories'] as List).isNotEmpty) {
-        query = query.where('category', whereIn: filters['categories']);
-      }
+      // Categories are filtered client-side below: server-side whereIn caps
+      // at 10 elements and where(category)+orderBy(date) needs a composite
+      // index, both of which crash at runtime.
+      categoryFilter =
+          (filters['categories'] as List?)?.map((c) => c.toString()).toList();
       if (filters['minAmount'] != null) {
         query = query.where('amount', isGreaterThanOrEqualTo: filters['minAmount']);
       }
@@ -99,6 +103,10 @@ class ExpenseService with ChangeNotifier {
                 })
                 .where((expense) => expense != null)
                 .cast<Expense>()
+                .where((expense) =>
+                    categoryFilter == null ||
+                    categoryFilter.isEmpty ||
+                    categoryFilter.contains(expense.category))
                 .toList();
           } catch (e) {
             debugPrint('Error processing expenses snapshot: $e');
@@ -146,13 +154,14 @@ class ExpenseService with ChangeNotifier {
     );
   }
 
-  /// Calculate total expenses in primary currency for a list of expenses
+  /// Calculate total expenses in primary currency for a list of expenses.
+  /// Conversions run in parallel and rates are cached per pair (see
+  /// CurrencyConversionService), so 50 foreign rows cost ~1 HTTP call.
   Future<double> calculateTotalInPrimaryCurrency(List<Expense> expenses) async {
-    double total = 0;
-    for (var expense in expenses) {
-      total += await getExpenseInPrimaryCurrency(expense);
-    }
-    return total;
+    final converted = await Future.wait<double>(
+      expenses.map(getExpenseInPrimaryCurrency),
+    );
+    return converted.fold<double>(0.0, (sum, amount) => sum + amount);
   }
 
   // Helper: Start of time range

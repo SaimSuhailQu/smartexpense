@@ -99,6 +99,10 @@ class LoanDetailsScreen extends StatelessWidget {
               if (value == null || value.isEmpty) {
                 return 'Please enter an amount';
               }
+              final parsed = Provider.of<CurrencyService>(context, listen: false)
+                  .parseAmount(value);
+              if (parsed == null) return 'Please enter a valid number';
+              if (parsed <= 0) return 'Amount must be greater than zero';
               return null;
             },
           ),
@@ -119,7 +123,7 @@ class LoanDetailsScreen extends StatelessWidget {
                 
                 final payment = Payment(
                   id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  amount: currencyService.parseAmount(amountController.text),
+                  amount: currencyService.parseAmount(amountController.text)!,
                   date: DateTime.now(),
                   notes: notesController.text,
                 );

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:smartexpense/utils/model_parsing.dart';
 
 enum Frequency { daily, weekly, monthly, yearly }
 
@@ -41,18 +42,19 @@ class RecurringTransaction {
 
   factory RecurringTransaction.fromMap(Map<String, dynamic> map) {
     return RecurringTransaction(
-      id: map['id'],
-      title: map['title'],
-      amount: map['amount'],
-      category: map['category'],
-      type: map['type'],
-      frequency: Frequency.values
-          .firstWhere((e) => e.toString() == map['frequency']),
-      startDate: (map['startDate'] as Timestamp).toDate(),
-      endDate: map['endDate'] != null
-          ? (map['endDate'] as Timestamp).toDate()
-          : null,
-      nextOccurrenceDate: (map['nextOccurrenceDate'] as Timestamp).toDate(),
+      id: map['id'] ?? '',
+      title: map['title'] ?? '',
+      amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
+      category: map['category'] ?? 'Other',
+      type: map['type'] ?? 'expense',
+      frequency: Frequency.values.firstWhere(
+        (e) => e.toString() == map['frequency'],
+        orElse: () => Frequency.monthly,
+      ),
+      startDate: parseModelDate(map['startDate']),
+      endDate:
+          map['endDate'] != null ? parseModelDate(map['endDate']) : null,
+      nextOccurrenceDate: parseModelDate(map['nextOccurrenceDate']),
     );
   }
 }

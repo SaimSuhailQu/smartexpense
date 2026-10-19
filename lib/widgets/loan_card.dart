@@ -83,8 +83,8 @@ class _LoanCardState extends State<LoanCard> {
     }
     
     final repaymentAmount = currencyService.parseAmount(repaymentString);
-    
-    if (repaymentAmount <= 0) {
+
+    if (repaymentAmount == null || repaymentAmount <= 0) {
       const snackBar = SnackBar(
         content: Text('Please enter a valid repayment amount'),
         backgroundColor: Colors.red,

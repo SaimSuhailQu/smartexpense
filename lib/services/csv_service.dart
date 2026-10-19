@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:smartexpense/models/expense.dart';
 import 'package:smartexpense/services/categorizer_service.dart';
 import 'package:open_file/open_file.dart';
@@ -28,7 +29,7 @@ class CsvService {
       ];
 
       final String csv = Csv().encode(csvData);
-      final String path = (await getDownloadsDirectory())!.path;
+      final String path = (await _writableDirectory()).path;
       final String fileName = customFileName ?? 'expenses_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.csv';
       final File file = File('$path/$fileName');
       
@@ -104,7 +105,7 @@ class CsvService {
 
           // Process amounts in columns 1, 2, 3, etc.
           for (var j = 1; j < row.length; j++) {
-            final amount = _parseAmount(row[j].toString());
+            final amount = parseAmount(row[j].toString());
             if (amount <= 0) continue;
 
             final DateTime expenseDate;
@@ -117,7 +118,7 @@ class CsvService {
             }
 
             expenses.add(Expense(
-              id: DateTime.now().millisecondsSinceEpoch.toString() + expenses.length.toString(),
+              id: FirebaseFirestore.instance.collection('_ids').doc().id,
               title: '$category Expense $j',
               amount: amount,
               date: expenseDate,
@@ -164,11 +165,11 @@ class CsvService {
 
         // Process amounts in columns 1, 2, 3, etc.
         for (var j = 1; j < row.length; j++) {
-          final amount = _parseAmount(row[j].toString());
+          final amount = parseAmount(row[j].toString());
           if (amount <= 0) continue;
 
           expenses.add(Expense(
-            id: DateTime.now().millisecondsSinceEpoch.toString() + expenses.length.toString(),
+            id: FirebaseFirestore.instance.collection('_ids').doc().id,
             title: '$category Expense $j',
             amount: amount,
             date: DateTime.now().subtract(Duration(days: j - 1)), // Spread across recent days
@@ -197,7 +198,7 @@ class CsvService {
       ];
 
       final String csv = Csv().encode(csvData);
-      final String path = (await getDownloadsDirectory())!.path;
+      final String path = (await _writableDirectory()).path;
       const String fileName = 'expense_template.csv';
       final File file = File('$path/$fileName');
       
@@ -222,7 +223,7 @@ class CsvService {
       ];
 
       final String csv = Csv().encode(csvData);
-      final String path = (await getDownloadsDirectory())!.path;
+      final String path = (await _writableDirectory()).path;
       const String fileName = 'custom_format_template.csv';
       final File file = File('$path/$fileName');
       
@@ -247,7 +248,7 @@ class CsvService {
       ];
 
       final String csv = Csv().encode(csvData);
-      final String path = (await getDownloadsDirectory())!.path;
+      final String path = (await _writableDirectory()).path;
       const String fileName = 'sample_user_format.csv';
       final File file = File('$path/$fileName');
       
@@ -272,14 +273,40 @@ class CsvService {
            firstCell.contains('name');
   }
 
+  /// Writable directory: Downloads when available, app documents otherwise.
+  /// getDownloadsDirectory() returns null on some platforms - the old code
+  /// force-unwrapped it and crashed there.
+  Future<Directory> _writableDirectory() async {
+    return await getDownloadsDirectory() ??
+        await getApplicationDocumentsDirectory();
+  }
+
   /// Helper method to parse amount from various formats
-  double _parseAmount(String value) {
+  /// Parses a user/CSV amount string. Public and static so it is unit-testable.
+  static double parseAmount(String value) {
     if (value.isEmpty) return 0.0;
-    
+
     try {
-      // Remove currency symbols and spaces
-      final cleanValue = value.toString().replaceAll(RegExp(r'[^\d.]'), '');
-      return double.parse(cleanValue);
+      var cleanValue = value.trim();
+      // Keep a single leading minus: "-50" must not silently become "50".
+      final isNegative = cleanValue.startsWith('-');
+      if (isNegative) cleanValue = cleanValue.substring(1).trim();
+      // Strip common currency markers ("Rs.", "PKR", "$", ...).
+      cleanValue = cleanValue.replaceAll(
+        RegExp(r'^(Rs\.?|PKR|USD|EUR|\$|\u20AC|\u00A3|\u00A5)\s*',
+            caseSensitive: false),
+        '',
+      );
+      // Keep only digits and decimal points.
+      cleanValue = cleanValue.replaceAll(RegExp(r'[^\d.]'), '');
+      // Malformed numbers like "1.2.3" are rejected instead of misparsed.
+      if (cleanValue.isEmpty ||
+          cleanValue == '.' ||
+          cleanValue.split('.').length > 2) {
+        return 0.0;
+      }
+      final parsed = double.parse(cleanValue);
+      return isNegative ? -parsed : parsed;
     } catch (e) {
       return 0.0;
     }

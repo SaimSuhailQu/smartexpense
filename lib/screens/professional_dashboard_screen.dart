@@ -69,6 +69,16 @@ class _ProfessionalDashboardScreenState
   Timer? _searchDebounce;
   Map<String, dynamic> _appliedFilters = {};
 
+  // Memoized conversion futures (perf): the StreamBuilders below used to
+  // create brand-new conversion futures on every emission, refiring the
+  // whole currency-conversion batch each time. These are rebuilt only when
+  // the underlying expense/income data actually changes.
+  String? _totalsKey;
+  Future<List<double>>? _totalsFuture;
+  String? _convertedKey;
+  Future<List<Expense>>? _convertedFuture;
+  late final Stream<List<Budget>> _budgetsStream;
+
   Map<String, double> _getCategoryData(List<Expense> expenses) {
     final Map<String, double> categoryTotals = {};
     for (final expense in expenses) {
@@ -102,6 +112,41 @@ class _ProfessionalDashboardScreenState
     _setupAnimations();
     _setupSearchListener();
     _checkForRecurringTransactions();
+    // Hoisted: a new stream instance per build would resubscribe every setState.
+    _budgetsStream = context.read<BudgetService>().getBudgetsStream();
+  }
+
+  String _expenseSig(List<Expense> e) =>
+      '${e.length}:${e.fold(0, (h, x) => h ^ x.id.hashCode ^ x.amount.hashCode)}';
+  String _incomeSig(List<Income> i) =>
+      '${i.length}:${i.fold(0, (h, x) => h ^ x.id.hashCode ^ x.amount.hashCode)}';
+
+  /// [expenseTotal, incomeTotal], recomputed only when the data changes.
+  Future<List<double>> _getTotalsFuture(
+    ExpenseService expenseService,
+    IncomeService incomeService,
+    List<Expense> expenses,
+    List<Income> incomes,
+  ) {
+    final key = '${_expenseSig(expenses)}|${_incomeSig(incomes)}';
+    if (_totalsKey != key) {
+      _totalsKey = key;
+      _totalsFuture = Future.wait([
+        expenseService.calculateTotalInPrimaryCurrency(expenses),
+        incomeService.calculateTotalInPrimaryCurrency(incomes),
+      ]);
+    }
+    return _totalsFuture!;
+  }
+
+  /// Converted expenses, recomputed only when the expense data changes.
+  Future<List<Expense>> _getConvertedFuture(List<Expense> expenses) {
+    final key = _expenseSig(expenses);
+    if (_convertedKey != key) {
+      _convertedKey = key;
+      _convertedFuture = _convertExpensesToPrimary(expenses);
+    }
+    return _convertedFuture!;
   }
 
   void _checkForRecurringTransactions() {
@@ -639,7 +684,6 @@ class _ProfessionalDashboardScreenState
   Widget _buildSummaryCards(Color cardColor, Color textColor) {
     final expenseService = context.watch<ExpenseService>();
     final incomeService = context.watch<IncomeService>();
-    final budgetService = context.watch<BudgetService>();
 
     return StreamBuilder<Map<String, dynamic>>(
       stream: _getCombinedFinancialStream(expenseService, incomeService),
@@ -660,20 +704,18 @@ class _ProfessionalDashboardScreenState
         final filteredExpenses = _filterExpenses(expenses);
         final filteredIncomes = _filterIncomes(incomes);
 
-        return FutureBuilder<double>(
-          future: expenseService.calculateTotalInPrimaryCurrency(filteredExpenses),
-          builder: (context, expenseSnapshot) {
-            return FutureBuilder<double>(
-              future: incomeService.calculateTotalInPrimaryCurrency(filteredIncomes),
-              builder: (context, incomeSnapshot) {
-                return StreamBuilder<List<Budget>>(
-                  stream: budgetService.getBudgetsStream(),
-                  builder: (context, budgetSnapshot) {
-                    final totalExpenses = expenseSnapshot.data ?? 0.0;
-                    final totalIncome = incomeSnapshot.data ?? 0.0;
-                    
-                    final budgets = budgetSnapshot.data ?? [];
-                    final totalBudget = budgets.fold<double>(0.0, (sum, b) => sum + b.amount);
+        return FutureBuilder<List<double>>(
+          future: _getTotalsFuture(
+              expenseService, incomeService, filteredExpenses, filteredIncomes),
+          builder: (context, totalsSnapshot) {
+            return StreamBuilder<List<Budget>>(
+              stream: _budgetsStream,
+              builder: (context, budgetSnapshot) {
+                final totalExpenses = totalsSnapshot.data?[0] ?? 0.0;
+                final totalIncome = totalsSnapshot.data?[1] ?? 0.0;
+
+                final budgets = budgetSnapshot.data ?? [];
+                final totalBudget = budgets.fold<double>(0.0, (sum, b) => sum + b.amount);
 
                     return Column(
                       children: [
@@ -736,8 +778,6 @@ class _ProfessionalDashboardScreenState
                     );
                   },
                 );
-              },
-            );
           },
         );
       },
@@ -1058,7 +1098,7 @@ class _ProfessionalDashboardScreenState
           final filteredIncomes = _filterIncomes(incomes);
 
           return FutureBuilder<List<Expense>>(
-            future: _convertExpensesToPrimary(filteredExpenses),
+            future: _getConvertedFuture(filteredExpenses),
             builder: (context, convertedSnapshot) {
               if (!convertedSnapshot.hasData) {
                 return _buildChartLoadingState(cardColor);
@@ -1106,7 +1146,7 @@ class _ProfessionalDashboardScreenState
             final filteredExpenses = _filterExpenses(expenses);
 
             return FutureBuilder<List<Expense>>(
-              future: _convertExpensesToPrimary(filteredExpenses),
+              future: _getConvertedFuture(filteredExpenses),
               builder: (context, convertedSnapshot) {
                 if (!convertedSnapshot.hasData) {
                   return _buildChartLoadingState(cardColor);

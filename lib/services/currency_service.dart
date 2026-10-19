@@ -60,24 +60,30 @@ class CurrencyService with ChangeNotifier {
     }
   }
 
+  /// Decimals shown for the active currency: PKR/JPY have no minor unit
+  /// in practice, USD/EUR show cents.
+  int get decimals => (_currency == 'USD' || _currency == 'EUR') ? 2 : 0;
+
   String formatAmount(double amount) {
-    return '$symbol ${amount.toStringAsFixed(0)}';
+    return '$symbol ${amount.toStringAsFixed(decimals)}';
   }
 
   String formatAmountWithDecimal(double amount) {
     return '$symbol ${amount.toStringAsFixed(2)}';
   }
 
-  double parseAmount(String amountString) {
+  /// Returns null when the string is not a valid amount, so callers can
+  /// distinguish "invalid input" from a real zero.
+  double? parseAmount(String amountString) {
     // Remove currency symbol and any spaces
     final cleanedString = amountString.replaceAll(_symbol, '').trim();
     // Remove any commas (for thousand separators)
     final normalizedString = cleanedString.replaceAll(',', '');
-    
+
     try {
       return double.parse(normalizedString);
     } catch (e) {
-      return 0.0;
+      return null;
     }
   }
 

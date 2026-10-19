@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smartexpense/models/recurring_transaction.dart';
+import 'package:smartexpense/utils/date_utils.dart';
 import 'package:smartexpense/models/expense.dart';
 import 'package:smartexpense/models/income.dart';
 import 'package:smartexpense/services/expense_service.dart';
@@ -144,18 +145,10 @@ class RecurringTransactionService with ChangeNotifier {
             nextDate = transaction.nextOccurrenceDate.add(const Duration(days: 7));
             break;
           case Frequency.monthly:
-            nextDate = DateTime(
-              transaction.nextOccurrenceDate.year,
-              transaction.nextOccurrenceDate.month + 1,
-              transaction.nextOccurrenceDate.day,
-            );
+            nextDate = addMonthsClamped(transaction.nextOccurrenceDate, 1);
             break;
           case Frequency.yearly:
-            nextDate = DateTime(
-              transaction.nextOccurrenceDate.year + 1,
-              transaction.nextOccurrenceDate.month,
-              transaction.nextOccurrenceDate.day,
-            );
+            nextDate = addMonthsClamped(transaction.nextOccurrenceDate, 12);
             break;
         }
 
@@ -179,4 +172,5 @@ class RecurringTransactionService with ChangeNotifier {
       }
     }
   }
+
 }
