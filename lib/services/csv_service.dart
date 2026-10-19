@@ -287,13 +287,22 @@ class CsvService {
     if (value.isEmpty) return 0.0;
 
     try {
-      // Strip currency symbols and spaces but keep a single leading minus,
-      // otherwise "-50" silently becomes "50".
-      var cleanValue = value.trim().replaceAll(RegExp(r'[^\-\d.]'), '');
+      var cleanValue = value.trim();
+      // Keep a single leading minus: "-50" must not silently become "50".
       final isNegative = cleanValue.startsWith('-');
-      cleanValue = cleanValue.replaceAll('-', '');
-      // Malformed numbers like "1.2.3" are rejected instead of parsed.
-      if (cleanValue.isEmpty || cleanValue == '.' || cleanValue.split('.').length > 2) {
+      if (isNegative) cleanValue = cleanValue.substring(1).trim();
+      // Strip common currency markers ("Rs.", "PKR", "$", ...).
+      cleanValue = cleanValue.replaceAll(
+        RegExp(r'^(Rs\.?|PKR|USD|EUR|\$|\u20AC|\u00A3|\u00A5)\s*',
+            caseSensitive: false),
+        '',
+      );
+      // Keep only digits and decimal points.
+      cleanValue = cleanValue.replaceAll(RegExp(r'[^\d.]'), '');
+      // Malformed numbers like "1.2.3" are rejected instead of misparsed.
+      if (cleanValue.isEmpty ||
+          cleanValue == '.' ||
+          cleanValue.split('.').length > 2) {
         return 0.0;
       }
       final parsed = double.parse(cleanValue);
