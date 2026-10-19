@@ -47,3 +47,8 @@ app.*.map.json
 # Keystore base64 export
 keystore_base64.txt
 
+
+# Release keystores must never be committed (see audit: leaked in history)
+*.jks*
+*.keystore
+android/key.properties

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:smartexpense/utils/model_parsing.dart';
 
 class Payment {
   final String id;
@@ -14,15 +15,7 @@ class Payment {
   });
 
   factory Payment.fromMap(Map<String, dynamic> map) {
-    // Handle both Timestamp (from Firestore) and int (from local storage)
-    DateTime dateTime;
-    if (map['date'] is Timestamp) {
-      dateTime = (map['date'] as Timestamp).toDate();
-    } else if (map['date'] is int) {
-      dateTime = DateTime.fromMillisecondsSinceEpoch(map['date']);
-    } else {
-      dateTime = DateTime.now(); // Fallback
-    }
+    final DateTime dateTime = parseModelDate(map['date']);
 
     return Payment(
       id: map['id'] ?? '',

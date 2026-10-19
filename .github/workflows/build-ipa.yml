@@ -89,10 +89,10 @@ jobs:
         run: |
           if [ "$SIGNED_BUILD" = "true" ]; then
             echo "Building signed iOS App/IPA..."
-            flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+            flutter build ipa --release --export-options-plist=ios/ExportOptions.plist --dart-define=EXCHANGE_RATE_API_KEY=${{ secrets.EXCHANGE_RATE_API_KEY }}
           else
             echo "Building unsigned iOS App..."
-            flutter build ios --release --no-codesign
+            flutter build ios --release --no-codesign --dart-define=EXCHANGE_RATE_API_KEY=${{ secrets.EXCHANGE_RATE_API_KEY }}
             
             # Package into an IPA manually
             echo "Packaging unsigned .app into .ipa..."

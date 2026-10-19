@@ -16,6 +16,9 @@ class SmartExpenseAnalytics {
   final DateTime startDate;
   final DateTime endDate;
   final TimeRange timeRange;
+  /// Expenses from the period immediately before [startDate] - used for
+  /// honest period-over-period comparison. Never simulated.
+  final List<Expense> previousPeriodExpenses;
 
   SmartExpenseAnalytics({
     required this.expenses,
@@ -23,9 +26,13 @@ class SmartExpenseAnalytics {
     required this.startDate,
     required this.endDate,
     required this.timeRange,
+    this.previousPeriodExpenses = const [],
   });
 
   double get totalExpenses => expenses.fold(0.0, (sum, expense) => sum + expense.amount);
+  double get previousPeriodTotal =>
+      previousPeriodExpenses.fold(0.0, (sum, expense) => sum + expense.amount);
+  bool get hasPreviousPeriodData => previousPeriodExpenses.isNotEmpty;
   double get totalIncome => incomes.fold(0.0, (sum, income) => sum + income.amount);
   double get netBalance => totalIncome - totalExpenses;
   double get savingsRate => totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
@@ -180,6 +187,26 @@ class SmartExpenseAnalyticsDialogState extends State<SmartExpenseAnalyticsDialog
       final expenses = await expenseStream.firstOrDefault([]);
       final incomes = await incomeStream.firstOrDefault([]);
 
+      // Previous-period bounds for honest period-over-period comparison.
+      // Never simulated: if there is no history, the comparison card says so.
+      late DateTime prevStart, prevEnd;
+      switch (_selectedTimeRange) {
+        case TimeRange.daily:
+          prevStart = startDate.subtract(const Duration(days: 1));
+          prevEnd = prevStart;
+          break;
+        case TimeRange.yearly:
+          prevStart = DateTime(startDate.year - 1, startDate.month, startDate.day);
+          prevEnd = DateTime(endDate.year - 1, endDate.month, endDate.day, 23, 59, 59);
+          break;
+        default: // monthly and anything else
+          prevStart = DateTime(startDate.year, startDate.month - 1, 1);
+          prevEnd = DateTime(startDate.year, startDate.month, 0, 23, 59, 59);
+      }
+      final prevExpenses = await expenseService
+          .getExpensesBetweenDates(prevStart, prevEnd)
+          .firstOrDefault([]);
+
       // Check if widget is still mounted before updating state
       if (mounted) {
         setState(() {
@@ -189,6 +216,7 @@ class SmartExpenseAnalyticsDialogState extends State<SmartExpenseAnalyticsDialog
             startDate: startDate,
             endDate: endDate,
             timeRange: _selectedTimeRange,
+            previousPeriodExpenses: prevExpenses,
           );
           _isLoading = false;
         });
@@ -1521,7 +1549,24 @@ class SmartExpenseAnalyticsDialogState extends State<SmartExpenseAnalyticsDialog
 
   Widget _buildMonthlyComparisonChart() {
     final currencyService = Provider.of<CurrencyService>(context, listen: false);
-    final previousAmount = _analytics!.totalExpenses * 0.8; // Simulated previous period
+    if (!_analytics!.hasPreviousPeriodData) {
+      return Container(
+        height: 300,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            'Not enough history yet for a period comparison.',
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+    final previousAmount = _analytics!.previousPeriodTotal;
     final currentAmount = _analytics!.totalExpenses;
     final percentageChange = previousAmount > 0 
         ? ((currentAmount - previousAmount) / previousAmount * 100) 

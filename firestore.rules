@@ -1,0 +1,21 @@
+rules_version = '2';
+
+// SmartExpense Firestore rules.
+// Data is strictly per-user under users/{uid}/... — a signed-in user can only
+// read and write their own subtree. There is no shared/global data.
+//
+// Deploy:  firebase deploy --only firestore:rules
+// Project: smartexpenseapp-4e111
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Per-user subtree: expenses, incomes, budgets, loans, recurring_transactions.
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Everything else: deny by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

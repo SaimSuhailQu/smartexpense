@@ -144,18 +144,12 @@ class RecurringTransactionService with ChangeNotifier {
             nextDate = transaction.nextOccurrenceDate.add(const Duration(days: 7));
             break;
           case Frequency.monthly:
-            nextDate = DateTime(
-              transaction.nextOccurrenceDate.year,
-              transaction.nextOccurrenceDate.month + 1,
-              transaction.nextOccurrenceDate.day,
-            );
+            nextDate = _addMonthsClamped(
+                transaction.nextOccurrenceDate, 1);
             break;
           case Frequency.yearly:
-            nextDate = DateTime(
-              transaction.nextOccurrenceDate.year + 1,
-              transaction.nextOccurrenceDate.month,
-              transaction.nextOccurrenceDate.day,
-            );
+            nextDate = _addMonthsClamped(
+                transaction.nextOccurrenceDate, 12);
             break;
         }
 
@@ -179,4 +173,16 @@ class RecurringTransactionService with ChangeNotifier {
       }
     }
   }
+  /// Adds [months] to [date], clamping the day to the target month's length.
+  /// DateTime normalizes overflow (Jan 31 + 1 month -> Mar 3), which would
+  /// silently skip February for monthly recurrences.
+  static DateTime _addMonthsClamped(DateTime date, int months) {
+    final targetYear = date.year + ((date.month - 1 + months) ~/ 12);
+    final targetMonth = ((date.month - 1 + months) % 12) + 1;
+    final lastDay = DateTime(targetYear, targetMonth + 1, 0).day;
+    final day = date.day > lastDay ? lastDay : date.day;
+    return DateTime(targetYear, targetMonth, day, date.hour, date.minute,
+        date.second, date.millisecond, date.microsecond);
+  }
+
 }

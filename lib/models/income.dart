@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:smartexpense/utils/model_parsing.dart';
 
 class Income {
   final String id;
@@ -26,7 +27,7 @@ class Income {
       id: map['id'] ?? '',
       title: map['title'] ?? '',
       amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
-      date: (map['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      date: parseModelDate(map['date']),
       category: map['category'] ?? 'Other',
       notes: map['notes'],
       currency: map['currency'] ?? 'PKR',

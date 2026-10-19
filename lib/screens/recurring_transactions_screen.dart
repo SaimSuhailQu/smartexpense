@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smartexpense/models/recurring_transaction.dart';
 import 'package:smartexpense/services/recurring_transaction_service.dart';
+import 'package:smartexpense/services/currency_service.dart';
 import 'package:smartexpense/screens/add_recurring_transaction_screen.dart';
-import 'package:intl/intl.dart';
 
 class RecurringTransactionsScreen extends StatelessWidget {
   const RecurringTransactionsScreen({super.key});
@@ -26,6 +26,7 @@ class RecurringTransactionsScreen extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           final recurringTransactions = snapshot.data ?? [];
+          final currencyService = context.watch<CurrencyService>();
           if (recurringTransactions.isEmpty) {
             return const Center(child: Text('No recurring transactions found.'));
           }
@@ -38,8 +39,7 @@ class RecurringTransactionsScreen extends StatelessWidget {
                 subtitle: Text(
                     '${transaction.type} - Every ${transaction.frequency.toString().split('.').last}'),
                 trailing: Text(
-                  NumberFormat.currency(locale: 'en_IN', symbol: '₹')
-                      .format(transaction.amount),
+                  currencyService.formatAmount(transaction.amount),
                 ),
                 onTap: () {
                   Navigator.push(

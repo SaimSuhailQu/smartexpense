@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:smartexpense/utils/model_parsing.dart';
 
 class Budget {
   final String id;
@@ -27,11 +28,11 @@ class Budget {
 
   factory Budget.fromMap(Map<String, dynamic> map) {
     return Budget(
-      id: map['id'],
-      category: map['category'],
-      amount: map['amount'],
-      startDate: (map['startDate'] as Timestamp).toDate(),
-      endDate: (map['endDate'] as Timestamp).toDate(),
+      id: map['id'] ?? '',
+      category: map['category'] ?? 'Other',
+      amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
+      startDate: parseModelDate(map['startDate']),
+      endDate: parseModelDate(map['endDate']),
     );
   }
 }

@@ -67,9 +67,11 @@ class IncomeService with ChangeNotifier {
       if (filters['endDate'] != null) {
         query = query.where('date', isLessThanOrEqualTo: Timestamp.fromDate(filters['endDate']));
       }
-      if (filters['categories'] != null && (filters['categories'] as List).isNotEmpty) {
-        query = query.where('category', whereIn: filters['categories']);
-      }
+      // Categories are filtered client-side below: server-side whereIn caps
+      // at 10 elements and where(category)+orderBy(date) needs a composite
+      // index, both of which crash at runtime.
+      final List<String>? categoryFilter =
+          (filters['categories'] as List?)?.map((c) => c.toString()).toList();
       if (filters['minAmount'] != null) {
         query = query.where('amount', isGreaterThanOrEqualTo: filters['minAmount']);
       }
@@ -102,6 +104,10 @@ class IncomeService with ChangeNotifier {
             })
             .where((income) => income != null)
             .cast<Income>()
+            .where((income) =>
+                categoryFilter == null ||
+                categoryFilter.isEmpty ||
+                categoryFilter.contains(income.category))
             .toList();
 
         final primaryCurrency = _currencyService.primaryCurrency;
@@ -149,22 +155,19 @@ class IncomeService with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Parallelized: rates are cached per pair (see CurrencyConversionService),
+  /// so N foreign rows cost ~1 HTTP call instead of N serial round-trips.
   Future<double> calculateTotalInPrimaryCurrency(List<Income> incomes) async {
     final primaryCurrency = _currencyService.primaryCurrency;
-    double total = 0.0;
-
-    for (final income in incomes) {
-      if (income.currency == primaryCurrency) {
-        total += income.amount;
-      } else {
-        total += await _conversionService.convert(
-          income.amount,
-          income.currency,
-          primaryCurrency,
-        );
-      }
-    }
-    return total;
+    final converted = await Future.wait(incomes.map((income) async {
+      if (income.currency == primaryCurrency) return income.amount;
+      return _conversionService.convert(
+        income.amount,
+        income.currency,
+        primaryCurrency,
+      );
+    }));
+    return converted.fold(0.0, (sum, amount) => sum + amount);
   }
 
   // Helper: Start of time range

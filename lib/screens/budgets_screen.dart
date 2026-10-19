@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smartexpense/models/budget.dart';
+import 'package:smartexpense/models/expense.dart';
 import 'package:smartexpense/services/budget_service.dart';
+import 'package:smartexpense/services/currency_service.dart';
+import 'package:smartexpense/services/expense_service.dart';
 import 'package:smartexpense/screens/add_budget_screen.dart';
+import 'package:smartexpense/utils/date_utils.dart';
 import 'package:smartexpense/widgets/empty_state.dart';
 import 'package:smartexpense/widgets/shimmer_loading.dart';
 import 'package:smartexpense/theme/app_colors.dart';
@@ -10,13 +16,59 @@ import 'package:smartexpense/theme/typography.dart';
 import 'package:smartexpense/theme/spacing.dart';
 import 'package:intl/intl.dart';
 
-class BudgetsScreen extends StatelessWidget {
+class BudgetsScreen extends StatefulWidget {
   const BudgetsScreen({super.key});
+
+  @override
+  State<BudgetsScreen> createState() => _BudgetsScreenState();
+}
+
+class _BudgetsScreenState extends State<BudgetsScreen> {
+  late final Stream<List<Budget>> _budgetsStream;
+  StreamSubscription<List<Expense>>? _expensesSub;
+  List<Expense> _expenses = [];
+
+  @override
+  void initState() {
+    super.initState();
+    final budgetService = context.read<BudgetService>();
+    final expenseService = context.read<ExpenseService>();
+    // Hoisted so rebuilds don't resubscribe (new stream instance per build
+    // would restart the Firestore subscription every setState).
+    _budgetsStream = budgetService.getBudgetsStream();
+    // All expenses, filtered client-side per budget. A server-side
+    // where(category) + orderBy(date) would need a composite index and
+    // whereIn caps at 10 categories; client-side filtering avoids both.
+    _expensesSub = expenseService
+        .getExpensesStream(TimeRange.custom, DateTime.now(), filters: {
+      'startDate': DateTime(2000),
+      'endDate': DateTime(2100),
+    }).listen((expenses) {
+      if (mounted) setState(() => _expenses = expenses);
+    });
+  }
+
+  @override
+  void dispose() {
+    _expensesSub?.cancel();
+    super.dispose();
+  }
+
+  /// Real spend for a budget: expenses in its category inside its date range.
+  double _spentFor(Budget budget) {
+    return _expenses
+        .where((e) =>
+            e.category == budget.category &&
+            !e.date.isBefore(budget.startDate) &&
+            !e.date.isAfter(budget.endDate))
+        .fold(0.0, (sum, e) => sum + e.amount);
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final currencyService = context.watch<CurrencyService>();
 
     return Scaffold(
       // Background color using theme-aware surface color
@@ -37,7 +89,7 @@ class BudgetsScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<List<Budget>>(
-        stream: context.watch<BudgetService>().getBudgetsStream(),
+        stream: _budgetsStream,
         builder: (context, snapshot) {
           // Loading state with shimmer effect
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,8 +164,10 @@ class BudgetsScreen extends StatelessWidget {
             itemCount: budgets.length,
             itemBuilder: (context, index) {
               final budget = budgets[index];
-              // Calculate budget usage percentage (mock - you may need actual spent amount)
-              final percentage = 0.5; // Replace with actual calculation from budget service
+              // Real usage: spent in this budget's category and date range.
+              final spent = _spentFor(budget);
+              final percentage =
+                  budget.amount > 0 ? spent / budget.amount : 0.0;
               final budgetColor = AppColors.getBudgetStatusColor(percentage);
 
               return Padding(
@@ -183,7 +237,7 @@ class BudgetsScreen extends StatelessWidget {
                               AppSpacing.horizontalSpaceMD,
                               // Budget amount
                               Text(
-                                NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(budget.amount),
+                                currencyService.formatAmount(budget.amount),
                                 style: AppTypography.financialMedium(
                                   color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                                 ),
@@ -213,17 +267,17 @@ class BudgetsScreen extends StatelessWidget {
 
                           AppSpacing.verticalSpaceMD,
 
-                          // Progress indicator (if you have spent amount tracking)
-                          // Uncomment and implement when spent tracking is available
-                          /*
-                          LinearProgressIndicator(
-                            value: percentage,
-                            backgroundColor: isDark
-                                ? AppColors.surfaceDark2
-                                : AppColors.surfaceLight2,
-                            valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
-                            minHeight: 8,
+                          // Progress indicator with real spent tracking
+                          ClipRRect(
                             borderRadius: BorderRadius.circular(AppSpacing.radiusSM),
+                            child: LinearProgressIndicator(
+                              value: percentage.clamp(0.0, 1.0),
+                              backgroundColor: isDark
+                                  ? AppColors.surfaceDark2
+                                  : AppColors.surfaceLight2,
+                              valueColor: AlwaysStoppedAnimation<Color>(budgetColor),
+                              minHeight: 8,
+                            ),
                           ),
 
                           AppSpacing.verticalSpaceMD,
@@ -232,7 +286,7 @@ class BudgetsScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Spent: ${NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(budget.amount * percentage)}',
+                                'Spent: ${currencyService.formatAmount(spent)}',
                                 style: AppTypography.labelMedium(
                                   color: budgetColor,
                                 ),
@@ -245,7 +299,6 @@ class BudgetsScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          */
                         ],
                       ),
                     ),
