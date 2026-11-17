@@ -11,6 +11,8 @@ buildscript {
     dependencies {
         // Android Gradle Plugin - kept in sync with settings.gradle.kts (9.3.1)
         classpath("com.android.tools.build:gradle:9.3.1")
+        // AGP public DSL API types (ApplicationExtension/LibraryExtension)
+        classpath("com.android.tools.build:gradle-api:9.3.1")
         // Kotlin Gradle Plugin
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
         // ✅ Needed for Firebase support
@@ -44,13 +46,13 @@ subprojects {
 // every Android module (app + libraries).
 subprojects {
     plugins.withId("com.android.application") {
-        extensions.configure<com.android.build.gradle.AppExtension> {
-            lint { checkReleaseBuilds = false }
+        extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
+            lintOptions { checkReleaseBuilds = false }
         }
     }
     plugins.withId("com.android.library") {
-        extensions.configure<com.android.build.gradle.LibraryExtension> {
-            lint { checkReleaseBuilds = false }
+        extensions.configure<com.android.build.api.dsl.LibraryExtension> {
+            lintOptions { checkReleaseBuilds = false }
         }
     }
 }
