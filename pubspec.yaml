@@ -52,6 +52,16 @@ dev_dependencies:
     flutter_test:
       sdk: flutter
 
+# AGP 9 / Built-in Kotlin: these transitive Android implementations still
+# apply the kotlin-android plugin at their locked versions, which AGP 9
+# refuses outright. Pinned to releases that rely on built-in Kotlin
+# (verified: their android build files no longer apply the plugin).
+# dynamic_color is fixed separately via ^1.9.0 above.
+dependency_overrides:
+  google_sign_in_android: ^7.2.19
+  image_picker_android: ^0.8.13+25
+  shared_preferences_android: ^2.5.5
+
 flutter:
   uses-material-design: true
   config:
