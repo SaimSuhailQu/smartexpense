@@ -55,12 +55,6 @@ android {
         }
     }
 
-    lint {
-        // See android/build.gradle.kts: AGP 9.3.1 lint crashes on
-        // :image_picker_android during release builds.
-        checkReleaseBuilds = false
-    }
-
     // Add compiler arguments to show deprecation details and suppress obsolete warnings
     tasks.withType<JavaCompile> {
         options.compilerArgs.addAll(listOf(
