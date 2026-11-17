@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smartexpense/services/budget_service.dart';
 import 'package:smartexpense/services/categorizer_service.dart';
 import 'package:smartexpense/services/csv_service.dart';
 import 'package:smartexpense/services/expense_service.dart';
@@ -240,6 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildCategoryManagement(List<String> categories, CategorizerService categorizer, bool isDark) {
+    final duplicateGroups = categorizer.findDuplicateGroups();
     return Card(
       elevation: 0,
       color: AppColors.getSurfaceColor(Theme.of(context).brightness, 1),
@@ -315,6 +317,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             const Divider(),
+            if (duplicateGroups.isNotEmpty)
+              _buildActionTile(
+                Icons.merge_type,
+                'Clean up duplicates',
+                '${duplicateGroups.length} duplicate group(s) found — merge them into one category',
+                Colors.blue,
+                () => _showDuplicateCleanupDialog(categorizer),
+              ),
             ListTile(
               leading: const Icon(Icons.add_circle, color: Colors.green),
               title: const Text('Add New Category'),
@@ -1076,10 +1086,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ElevatedButton(
             onPressed: () {
               final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                categorizer.addCategory(name);
+              if (name.isEmpty) return;
+              final similar = categorizer.findSimilarCategory(name);
+              if (similar != null) {
                 Navigator.of(context).pop();
+                _showUseExistingCategoryDialog(categorizer, name, similar);
+                return;
+              }
+              final used = categorizer.addCategory(name);
+              Navigator.of(context).pop();
+              if (used == name) {
                 _showSnackBar('Category "$name" added successfully', Colors.green);
+              } else {
+                _showSnackBar('Category already exists as "$used"', Colors.orange);
               }
             },
             child: const Text('Add'),
@@ -1087,6 +1106,160 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  void _showUseExistingCategoryDialog(
+    CategorizerService categorizer,
+    String typedName,
+    String existingName,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Similar category exists'),
+        content: Text(
+          '"$typedName" looks like the existing category "$existingName". Use that one instead?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              categorizer.addCategory(typedName);
+              Navigator.of(dialogContext).pop();
+              _showSnackBar('Category "$typedName" added', Colors.green);
+            },
+            child: const Text('Create anyway'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _showSnackBar('Using existing category "$existingName"', Colors.green);
+            },
+            child: Text('Use "$existingName"'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDuplicateCleanupDialog(CategorizerService categorizer) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          final groups = categorizer.findDuplicateGroups();
+          return AlertDialog(
+            title: const Text('Clean up duplicates'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'These categories mean the same thing. Merging moves their expenses and budgets into one category.',
+                    ),
+                    const SizedBox(height: 16),
+                    if (groups.isEmpty)
+                      const Text('No duplicates left — all cleaned up!'),
+                    ...groups.map((group) {
+                      final keep = categorizer.pickCanonicalForGroup(group);
+                      final dupes =
+                          group.where((name) => name != keep).toList();
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Keep "$keep"',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text('Merge in: ${dupes.join(', ')}'),
+                              const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    await _mergeCategoryGroup(
+                                      categorizer,
+                                      keep,
+                                      dupes,
+                                    );
+                                    if (dialogContext.mounted) {
+                                      setDialogState(() {});
+                                    }
+                                    if (mounted) setState(() {});
+                                  },
+                                  child: const Text('Merge'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Done'),
+              ),
+              ElevatedButton(
+                onPressed: groups.isEmpty
+                    ? null
+                    : () async {
+                        for (final group
+                            in categorizer.findDuplicateGroups()) {
+                          final keep =
+                              categorizer.pickCanonicalForGroup(group);
+                          final dupes = group
+                              .where((name) => name != keep)
+                              .toList();
+                          await _mergeCategoryGroup(categorizer, keep, dupes);
+                        }
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop();
+                        }
+                        if (mounted) setState(() {});
+                      },
+                child: const Text('Merge all'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Merges [dupes] into [keep] and re-points the expenses and budgets
+  /// that used them. Returns the number of records moved.
+  Future<int> _mergeCategoryGroup(
+    CategorizerService categorizer,
+    String keep,
+    List<String> dupes,
+  ) async {
+    final removed = categorizer.mergeCategories(keep: keep, duplicates: dupes);
+    if (removed.isEmpty) return 0;
+    var moved = 0;
+    for (final name in removed) {
+      moved += await context.read<ExpenseService>().renameCategory(name, keep);
+      moved += await context.read<BudgetService>().renameCategory(name, keep);
+    }
+    if (mounted) {
+      _showSnackBar(
+        'Merged ${removed.join(', ')} into "$keep" ($moved records moved)',
+        Colors.green,
+      );
+    }
+    return moved;
   }
 
   void _showEditCategoryDialog(String category, CategorizerService categorizer) {
@@ -1245,12 +1418,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (newName.isNotEmpty && newName != category) {
                 if (categorizer.categories.containsKey(newName)) {
                   _showSnackBar('Category "$newName" already exists!', Colors.red);
-                } else {
-                  categorizer.renameCategory(category, newName);
+                } else if (categorizer.renameCategory(category, newName)) {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop(); // Close edit dialog too
                   _showSnackBar('Category renamed to "$newName"', Colors.green);
                   setState(() {});
+                } else {
+                  _showSnackBar(
+                    'A similar category already exists — pick a different name',
+                    Colors.red,
+                  );
                 }
               }
             },

@@ -270,10 +270,22 @@ class ExpenseFormState extends State<ExpenseForm> {
             onPressed: () {
               final newCategory = newCategoryController.text.trim();
               if (newCategory.isNotEmpty) {
-                context.read<CategorizerService>().addCategory(newCategory);
+                final categorizer = context.read<CategorizerService>();
+                // Point at the existing category when the typed name is a
+                // duplicate (exact or near) instead of creating a new one.
+                final similar = categorizer.findSimilarCategory(newCategory);
+                final effective =
+                    similar ?? categorizer.addCategory(newCategory);
                 setState(() {
-                  _category = newCategory;
+                  _category = effective;
                 });
+                if (similar != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Matched to existing category "$similar"'),
+                    ),
+                  );
+                }
                 Navigator.of(context).pop();
               }
             },
@@ -297,9 +309,13 @@ class ExpenseFormState extends State<ExpenseForm> {
           TextButton(
             child: const Text('Create'),
             onPressed: () {
-              context.read<CategorizerService>().addCategory(suggestedCategoryName);
+              final categorizer = context.read<CategorizerService>();
+              final effective = categorizer.findSimilarCategory(
+                    suggestedCategoryName,
+                  ) ??
+                  categorizer.addCategory(suggestedCategoryName);
               setState(() {
-                _category = suggestedCategoryName;
+                _category = effective;
               });
               Navigator.of(context).pop();
             },

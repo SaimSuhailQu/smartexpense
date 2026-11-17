@@ -140,6 +140,44 @@ class ExpenseService with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Re-points every expense in [oldName] to [newName] (used after merging
+  /// duplicate categories). Returns how many expenses were moved.
+  Future<int> renameCategory(String oldName, String newName) async {
+    if (_auth == null || _firestore == null) {
+      debugPrint('Firebase services not available on this platform');
+      return 0;
+    }
+    try {
+      final user = _auth!.currentUser;
+      if (user == null) throw Exception('User not logged in');
+
+      final collection = _firestore!
+          .collection('users')
+          .doc(user.uid)
+          .collection('expenses');
+      final snapshot =
+          await collection.where('category', isEqualTo: oldName).get();
+
+      // Firestore batches cap at 500 writes.
+      var moved = 0;
+      for (var i = 0; i < snapshot.docs.length; i += 500) {
+        final chunk = snapshot.docs.skip(i).take(500);
+        final batch = _firestore!.batch();
+        for (final doc in chunk) {
+          batch.update(doc.reference, {'category': newName});
+        }
+        await batch.commit();
+        moved += chunk.length;
+      }
+
+      if (moved > 0) notifyListeners();
+      return moved;
+    } catch (e) {
+      debugPrint('Error renaming category for expenses: $e');
+      rethrow;
+    }
+  }
+
   /// Converts an expense amount to the user's primary currency
   Future<double> getExpenseInPrimaryCurrency(Expense expense) async {
     // Note: This assumes Expense model has a 'currency' field.
