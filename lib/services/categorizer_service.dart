@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smartexpense/utils/category_matcher.dart' as category_matcher;
 import 'dart:convert';
 
 class CategorizerService with ChangeNotifier {
@@ -29,6 +30,12 @@ class CategorizerService with ChangeNotifier {
       } else {
         // Set default categories if none exist
         _setDefaultCategories();
+      }
+
+      // Heal case/spacing duplicates saved by older builds: "Food" and
+      // "food" collapse into one entry, keeping the first-seen name.
+      if (_collapseExactDuplicates()) {
+        _saveData();
       }
       
       // Load person names
@@ -168,12 +175,95 @@ class CategorizerService with ChangeNotifier {
   List<String> get personNames => _personNames.map((name) => 
     name[0].toUpperCase() + name.substring(1)).toList();
 
-  void addCategory(String category) {
-    if (!_categories.containsKey(category)) {
-      _categories[category] = [];
-      _saveData();
-      notifyListeners();
+  /// Merges keys that are identical after cleanup ("Food" vs "food").
+  /// Keeps the first-seen display name and unions the keywords.
+  /// Returns true when anything was merged.
+  bool _collapseExactDuplicates() {
+    final byNormalized = <String, String>{};
+    var changed = false;
+    for (final name in _categories.keys.toList()) {
+      final normalized = category_matcher.normalizeCategoryName(name);
+      final canonical = byNormalized[normalized];
+      if (canonical == null) {
+        byNormalized[normalized] = name;
+      } else {
+        final keywords = {...?_categories[canonical], ...?_categories[name]};
+        _categories[canonical] = keywords.toList();
+        _categories.remove(name);
+        changed = true;
+      }
     }
+    return changed;
+  }
+
+  /// Adds a category. Returns the name actually used: when a category with
+  /// the same name after cleanup already exists ("food" when "Food" is
+  /// there), nothing is created and the existing name is returned, so the
+  /// caller can point at it instead of creating a duplicate.
+  String addCategory(String category) {
+    final name = category.trim();
+    if (name.isEmpty) return name;
+    for (final existing in _categories.keys) {
+      if (category_matcher.normalizeCategoryName(existing) ==
+          category_matcher.normalizeCategoryName(name)) {
+        return existing;
+      }
+    }
+    _categories[name] = [];
+    _saveData();
+    notifyListeners();
+    return name;
+  }
+
+  /// The existing category most similar to [name] ("Foods" -> "Food"),
+  /// or null when nothing is close enough. Check this before creating a
+  /// category so the user can be asked instead of silently adding a
+  /// near-duplicate.
+  String? findSimilarCategory(String name) {
+    return category_matcher.findBestMatch(name, _categories.keys.toList());
+  }
+
+  /// Groups of duplicate category names, each with 2+ members in creation
+  /// order. The merge target for a group is its first member, or the member
+  /// with the most keywords (see [pickCanonicalForGroup]).
+  List<List<String>> findDuplicateGroups() {
+    return category_matcher.findDuplicateGroups(_categories.keys.toList());
+  }
+
+  /// The name a duplicate [group] should be merged into: the member with
+  /// the most keywords, ties broken by creation order.
+  String pickCanonicalForGroup(List<String> group) {
+    return category_matcher.pickCanonical(
+      group,
+      usageCounts: {
+        for (final name in group) name: _categories[name]?.length ?? 0,
+      },
+    );
+  }
+
+  /// Merges [duplicates] into [keep]: keywords are unioned (de-duplicated)
+  /// and the duplicate entries are removed. Returns the removed names so
+  /// the caller can re-point expenses and budgets that used them.
+  List<String> mergeCategories({
+    required String keep,
+    required List<String> duplicates,
+  }) {
+    if (!_categories.containsKey(keep)) return const [];
+    final removed = <String>[];
+    final keywords = <String>{...?_categories[keep]};
+    for (final dupe in duplicates) {
+      if (dupe == keep) continue;
+      final dupeKeywords = _categories.remove(dupe);
+      if (dupeKeywords != null) {
+        keywords.addAll(dupeKeywords);
+        removed.add(dupe);
+      }
+    }
+    if (removed.isEmpty) return const [];
+    _categories[keep] = keywords.toList();
+    _saveData();
+    notifyListeners();
+    return removed;
   }
 
   // NEW: Method to remove a category
@@ -184,15 +274,25 @@ class CategorizerService with ChangeNotifier {
     }
   }
 
-  // NEW: Method to rename a category
-  void renameCategory(String oldName, String newName) {
-    if (_categories.containsKey(oldName) && !_categories.containsKey(newName)) {
-      final keywords = _categories[oldName]!;
-      _categories.remove(oldName);
-      _categories[newName] = keywords;
-      _saveData();
-      notifyListeners();
+  // Method to rename a category. Returns false (and changes nothing) when
+  // [newName] is the same category as another existing one after cleanup
+  // ("Food" -> "foods" while "Foods" exists).
+  bool renameCategory(String oldName, String newName) {
+    final trimmed = newName.trim();
+    if (!_categories.containsKey(oldName) || trimmed.isEmpty) return false;
+    for (final existing in _categories.keys) {
+      if (existing != oldName &&
+          category_matcher.normalizeCategoryName(existing) ==
+              category_matcher.normalizeCategoryName(trimmed)) {
+        return false;
+      }
     }
+    final keywords = _categories[oldName]!;
+    _categories.remove(oldName);
+    _categories[trimmed] = keywords;
+    _saveData();
+    notifyListeners();
+    return true;
   }
 
   void addKeywordToCategory(String category, String keyword) {
@@ -274,7 +374,10 @@ class CategorizerService with ChangeNotifier {
         _personNames.clear();
         _personNames.addAll(List<String>.from(data['personNames']));
       }
-      
+
+      // Heal any exact duplicates that came in with the import.
+      _collapseExactDuplicates();
+
       _saveData();
       notifyListeners();
     } catch (e) {
